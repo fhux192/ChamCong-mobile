@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Chấm Công</string>
+    <string name="login">Đăng Nhập</string>
+    <string name="email">Email</string>
+    <string name="password">Mật Khẩu</string>
+    <string name="sign_in">Đăng Nhập</string>
+    <string name="register">Đăng Ký</string>
+    <string name="click_to_login">Đã có tài khoản?</string>
+    <string name="click_to_register">Quên mật khẩu?</string>
+    <string name="admin">Quản Trị Viên</string>
+    <string-array name="roles_array">
+        <item>Quản Trị Viên</item>
+        <item>Quản Lý</item>
+    </string-array>
+    <string name="add_manager">Thêm Quản Lý</string>
+    <string name="add_company">Thêm Công Ty</string>
+    <string name="manager_list">Danh Sách Quản Lý</string>
+    <string name="company_list">Danh Sách Công Ty</string>
+    <string name="sign_out">Đăng Xuất</string>
+</resources>

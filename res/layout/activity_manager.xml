@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    tools:context=".Admin">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!-- Tiêu đề -->
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/admin"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            tools:ignore="MissingConstraints" />
+
+        <!-- Nút thêm quản lý -->
+        <Button
+            android:id="@+id/add_employee"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/add_manager" />
+
+        <!-- Nút thêm công ty -->
+        <Button
+            android:id="@+id/add_company"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/add_company" />
+
+        <!-- Nút danh sách quản lý -->
+        <Button
+            android:id="@+id/manager_list"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/manager_list" />
+
+        <!-- Nút danh sách công ty -->
+        <Button
+            android:id="@+id/company_list"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/company_list" />
+
+        <!-- Nút đăng xuất -->
+        <Button
+            android:id="@+id/sign_out"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="@string/sign_out" />
+    </LinearLayout>
+</ScrollView>
