@@ -83,7 +83,6 @@ JNIEXPORT jint JNICALL Java_com_example_appcpp_MainActivityCPP_DetectFaces(JNIEn
         return 0;
     }
 
-    // Find the largest face
     int largestFaceIndex = 0;
     float maxArea = 0.0f;
 

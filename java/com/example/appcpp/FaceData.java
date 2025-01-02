@@ -8,15 +8,16 @@ import java.util.List;
 public class FaceData {
     private String userId;
     private String name;
+    private String companyName;
     private List<List<Float>> embeddings; // List of embeddings
 
     public FaceData() {
-        // Empty constructor for Firebase
     }
 
-    public FaceData(String userId, String name, List<List<Float>> embeddings) {
+    public FaceData(String userId, String name,String companyName, List<List<Float>> embeddings) {
         this.userId = userId;
         this.name = name;
+        this.companyName = companyName;
         this.embeddings = embeddings;
     }
 
@@ -36,6 +37,14 @@ public class FaceData {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCompanyName(){
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName){
+        this.companyName=companyName;
     }
 
     public List<List<Float>> getEmbeddings() {

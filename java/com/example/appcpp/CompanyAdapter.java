@@ -10,6 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+/**
+ * Adapter hiển thị danh sách CompanyData lên RecyclerView
+ */
 public class CompanyAdapter extends RecyclerView.Adapter<CompanyAdapter.CompanyViewHolder> {
 
     private List<CompanyData> companyList;
@@ -21,7 +24,6 @@ public class CompanyAdapter extends RecyclerView.Adapter<CompanyAdapter.CompanyV
     @NonNull
     @Override
     public CompanyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Inflate layout của item (ví dụ item_company_card.xml hoặc item_company.xml tùy bạn)
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_company, parent, false);
         return new CompanyViewHolder(view);
@@ -31,7 +33,6 @@ public class CompanyAdapter extends RecyclerView.Adapter<CompanyAdapter.CompanyV
     public void onBindViewHolder(@NonNull CompanyViewHolder holder, int position) {
         CompanyData company = companyList.get(position);
 
-        // Thêm prefix tiếng Việt cho các trường
         holder.textViewName.setText("Tên: " + company.getCompanyName());
         holder.textViewLat.setText("Vĩ độ: " + company.getLatitude());
         holder.textViewLng.setText("Kinh độ: " + company.getLongitude());
@@ -47,14 +48,15 @@ public class CompanyAdapter extends RecyclerView.Adapter<CompanyAdapter.CompanyV
 
         public CompanyViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Gắn ID cho TextView
             textViewName = itemView.findViewById(R.id.textViewCompanyName);
             textViewLat  = itemView.findViewById(R.id.textViewLatitude);
             textViewLng  = itemView.findViewById(R.id.textViewLongitude);
         }
     }
 
-    // Nếu cần cập nhật danh sách mới
+    /**
+     * Cập nhật data toàn bộ
+     */
     public void setCompanyList(List<CompanyData> newList) {
         this.companyList = newList;
         notifyDataSetChanged();

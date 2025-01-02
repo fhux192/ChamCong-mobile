@@ -1,5 +1,6 @@
 package com.example.appcpp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -188,6 +189,9 @@ public class CompanyRegister extends AppCompatActivity {
                     editTextCompanyName.setText("");
                     editTextLatitude.setText("");
                     editTextLongitude.setText("");
+                    Intent intent = new Intent(CompanyRegister.this, CompanyList.class);
+                    startActivity(intent);
+                    finish();
                 } else {
                     Toast.makeText(CompanyRegister.this, "Lỗi khi lưu công ty: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }

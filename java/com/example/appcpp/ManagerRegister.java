@@ -219,7 +219,6 @@ public class ManagerRegister extends AppCompatActivity {
                     }
                 });
     }
-
     /**
      * Generate a random password
      */
