@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Màu dấu tick khi được chọn -->
+    <item android:state_checked="true" android:color="#387478" /> <!-- Vàng mật ong -->
+    <!-- Màu dấu tick khi không được chọn -->
+    <item android:state_checked="false" android:color="#FFFFFF" /> <!-- Trắng -->
+</selector>

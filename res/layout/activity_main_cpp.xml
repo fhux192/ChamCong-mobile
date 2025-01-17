@@ -1,69 +1,102 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000">
 
-    >
     <org.opencv.android.JavaCameraView
         android:id="@+id/opencv_surface_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         opencv:camera_id="any" />
 
+    <!-- Nút "Thêm Người" với icon -->
     <Button
         android:id="@+id/galleryBtn"
-        android:layout_width="100dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:background="@drawable/custom_button"
-        android:layout_margin="12dp"
-        android:text="Thêm Người" />
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="220dp"
+        android:text="Thêm Người"
+        android:paddingHorizontal="4dp"
+        android:drawableStart="@drawable/ic_add_user"
+         />
 
+    <!-- Nút "Người Dùng" với icon -->
     <Button
         android:id="@+id/showFacesBtn"
-        android:layout_width="100dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
+        android:layout_gravity="bottom|end"
         android:background="@drawable/custom_button"
-        android:layout_margin="12dp"
-        android:text="Người Dùng" />
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="150dp"
+        android:text="Người Dùng"
+        android:paddingHorizontal="4dp"
+        android:drawableStart="@drawable/ic_user_face"
+         />
 
+    <!-- Nút "Đăng Nhập" với icon -->
     <Button
-        android:id="@+id/resetRecognitionBtn"
-        android:layout_width="100dp"
+        android:id="@+id/signInBtn"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:background="@drawable/custom_button"
         android:layout_margin="12dp"
-        android:text="Chấm Công" />
+        android:paddingHorizontal="4dp"
+        android:text="Đăng Nhập"
+        android:drawableStart="@drawable/ic_user"
+        />
 
+    <!-- Nút "Danh Sách" với icon -->
     <Button
         android:id="@+id/showCheckedListBtn"
-        android:layout_width="100dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:background="@drawable/custom_button"
         android:layout_margin="12dp"
-        android:text="Danh Sách" />
+        android:text="Danh Sách"
+        android:paddingHorizontal="4dp"
+        android:drawableStart="@drawable/ic_list"
+        />
 
+    <!-- Nút "Đăng Xuất" với icon -->
     <Button
         android:id="@+id/signOutBtn"
-        android:layout_width="100dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:background="@drawable/custom_button"
-        android:layout_margin="12dp"
-        android:text="Đăng Xuất"/>
+        android:layout_margin="10dp"
+        android:text="Đăng Xuất"
+        android:paddingHorizontal="4dp"
+        android:drawableStart="@drawable/ic_sign_out"
+        />
 
-    <Button
-        android:id="@+id/signInBtn"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:background="@drawable/custom_button"
-        android:layout_margin="12dp"
-        android:text="Đăng Nhập"/>
+    <!-- Nút "Chấm Công" với icon -->
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="ExtraText">
+
+        <Button
+            android:id="@+id/resetRecognitionBtn"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/custom_button"
+            android:layout_margin="12dp"
+            android:text="Chấm Công"
+            android:paddingHorizontal="4dp"
+            android:drawableStart="@drawable/ic_check"
+            />
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/imageView"

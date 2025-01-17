@@ -5,15 +5,15 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
+    android:background="@color/background_dark"
+    android:padding="24dp"
     tools:context=".Admin">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
         <!-- Tiêu đề -->
         <TextView
@@ -23,52 +23,213 @@
             android:text="@string/admin"
             android:gravity="center"
             android:textStyle="bold"
-            android:textSize="22sp"
-            android:layout_marginBottom="16dp"
-            tools:ignore="MissingConstraints" />
+            android:textSize="28sp"
+            android:textColor="@color/text_light"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"/>
 
-        <!-- Nút thêm quản lý -->
-        <Button
-            android:id="@+id/add_manager"
-            android:layout_width="300dp"
+        <!-- GridLayout cho 4 ô đầu tiên -->
+        <GridLayout
+            android:id="@+id/dashboard_grid"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:text="@string/add_manager" />
+            android:columnCount="2"
+            android:rowCount="2"
+            android:alignmentMode="alignMargins"
+            android:columnOrderPreserved="false"
+            android:useDefaultMargins="true"
+            android:layout_marginBottom="4dp">
 
-        <!-- Nút thêm công ty -->
-        <Button
-            android:id="@+id/add_company"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:text="@string/add_company" />
+            <!-- Ô Thêm Quản Lý -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/add_manager"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#fff"
+                android:layout_columnWeight="1"
+                android:layout_margin="8dp">
 
-        <!-- Nút danh sách quản lý -->
-        <Button
-            android:id="@+id/manager_list"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:text="@string/manager_list" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
 
-        <!-- Nút danh sách công ty -->
-        <Button
-            android:id="@+id/company_list"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:text="@string/company_list" />
+                    <ImageView
+                        android:id="@+id/icon_add_manager"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_add_manager"
+                        android:contentDescription="@string/add_manager"
+                    />
 
-        <!-- Nút đăng xuất -->
-        <Button
+                    <TextView
+                        android:id="@+id/text_add_manager"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_manager"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Ô Thêm Công Ty -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/add_company"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#fff"
+                android:layout_columnWeight="1"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/icon_add_company"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_add_company"
+                        android:contentDescription="@string/add_company"
+                />
+
+                    <TextView
+                        android:id="@+id/text_add_company"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_company"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Ô Danh Sách Quản Lý -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/manager_list"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#fff"
+                android:layout_columnWeight="1"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/icon_manager_list"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_manager_list"
+                        android:contentDescription="@string/manager_list"
+                      />
+
+                    <TextView
+                        android:id="@+id/text_manager_list"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/manager_list"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Ô Danh Sách Công Ty -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/company_list"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#fff"
+                android:layout_columnWeight="1"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/icon_company_list"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_company_list"
+                        android:contentDescription="@string/company_list"
+                     />
+
+                    <TextView
+                        android:id="@+id/text_company_list"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/company_list"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </GridLayout>
+
+        <!-- Ô Đăng Xuất (Chiếm 2 cột, full width) -->
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/sign_out"
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="@string/sign_out" />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:layout_margin="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="@color/dark_blue">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/icon_sign_out"
+                    android:layout_width="30dp"
+                    android:layout_height="34dp"
+                    android:src="@drawable/ic_sign_out"
+                    android:background="#fff"
+                    android:contentDescription="@string/sign_out" />
+                <TextView
+                    android:id="@+id/text_sign_out"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sign_out"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="#fff"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView>

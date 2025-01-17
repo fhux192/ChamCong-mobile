@@ -2,7 +2,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp">
+    android:background="@color/background_dark"
+    android:padding="24dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,39 +15,48 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="24sp"
+            android:textSize="28sp"
+            android:textColor="#fff"
             android:textStyle="bold"
             android:text="Thêm quản lý" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_corner"
+            app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/name"
-                android:hint="Tên"
+                android:hint="Họ và tên"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:background="@color/transparent"
                 android:inputType="textEmailAddress"
+                android:textColorHint="#fff"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="match_parent" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Trường nhập email -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_corner"
+            app:hintEnabled="false">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/email"
                 android:hint="Email"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:background="@color/transparent"
                 android:inputType="textEmailAddress"
+                android:textColorHint="#fff"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="match_parent" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Spinner chọn công ty -->
@@ -54,23 +64,62 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Chọn công ty"
+            android:textColor="#fff"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"/>
 
-        <Spinner
-            android:id="@+id/spinnerCompany"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp" />
+            android:layout_height="match_parent"
 
-        <!-- Button Đăng ký -->
-        <Button
-            android:id="@+id/btn_register"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Đăng ký"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp" />
+            android:orientation="horizontal"
+            >
+            <LinearLayout
+            android:layout_width="160dp"
+            android:layout_height="match_parent"
+            android:background="#fff">
+            <Spinner
+                android:id="@+id/spinnerCompany"
+                android:layout_width="160dp"
+                android:backgroundTint="#000"
+                android:layout_height="48dp"
+                />
+        </LinearLayout>
+            <!-- Button Đăng ký -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btn_register"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:gravity="end"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/dark_blue">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="8dp">
+
+
+                    <TextView
+                        android:id="@+id/text_sign_out"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Đăng Ký"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="#fff"
+                        android:gravity="center" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView></LinearLayout>
 
         <!-- ProgressBar -->
         <ProgressBar

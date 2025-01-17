@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Nền tối -->
+    <color name="background_dark">#111111</color>
+
+    <!-- Văn bản sáng -->
+    <color name="text_light">#FFFFFF</color>
+
+    <!-- Màu vàng mật ong -->
+    <color name="dark_blue">#387478</color>
+
+    <!-- Nút đen tối -->
+    <color name="button_dark">#115173</color>
+
+    <!-- Văn bản trên nút đen -->
+    <color name="button_text_dark">#121212</color>
+
+    <!-- Văn bản hỗ trợ -->
+    <color name="helper_text">#CCCCCC</color>
+
+    <!-- Màu trong suốt -->
+    <color name="transparent">#00000000</color>
+
+    <!-- Màu viền cho TextInputLayout -->
+    <color name="border_color">#387478</color>
+
+
 </resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme -->
+    <style name="Theme.YourApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/dark_blue</item>
+        <item name="colorOnPrimary">@color/text_light</item>
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/dark_blue</item>
+        <item name="colorOnSecondary">@color/text_light</item>
+        <!-- Background color -->
+        <item name="android:windowBackground">@color/background_dark</item>
+        <!-- Customize other theme attributes as needed -->
+    </style>
+
+    <!-- Style cho TextInputLayout -->
+    <style name="Widget.YourApp.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/border_color</item>
+        <item name="boxStrokeWidth">2dp</item>
+        <item name="boxBackgroundMode">outline</item>
+        <item name="helperTextTextColor">@color/helper_text</item>
+        <item name="placeholderTextColor">@color/helper_text</item>
+        <item name="startIconTint">@color/text_light</item>
+    </style>
+
+
+
+</resources>
