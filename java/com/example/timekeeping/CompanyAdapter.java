@@ -11,17 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-/**
- * Adapter hiển thị danh sách CompanyData lên RecyclerView
- */
 public class CompanyAdapter extends RecyclerView.Adapter<CompanyAdapter.CompanyViewHolder> {
 
+    // =============== FIELDS ===============
     private List<CompanyData> companyList;
 
+    // =============== CONSTRUCTOR ===============
     public CompanyAdapter(List<CompanyData> companyList) {
         this.companyList = companyList;
     }
 
+    // =============== CREATE VIEW HOLDER ===============
     @NonNull
     @Override
     public CompanyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -30,24 +30,23 @@ public class CompanyAdapter extends RecyclerView.Adapter<CompanyAdapter.CompanyV
         return new CompanyViewHolder(view);
     }
 
+    // =============== BIND DATA TO VIEW HOLDER ===============
     @Override
     public void onBindViewHolder(@NonNull CompanyViewHolder holder, int position) {
         CompanyData company = companyList.get(position);
-
         holder.textViewName.setText("Tên: " + company.getCompanyName());
-
-        // Nếu bạn muốn xử lý sự kiện click vào item
         holder.itemView.setOnClickListener(v -> {
             Toast.makeText(v.getContext(), "Bạn chọn: " + company.getCompanyName(), Toast.LENGTH_SHORT).show();
-            // Có thể mở chi tiết công ty hoặc thực hiện các hành động khác
         });
     }
 
+    // =============== RETURN ITEM COUNT ===============
     @Override
     public int getItemCount() {
         return companyList.size();
     }
 
+    // =============== VIEW HOLDER CLASS ===============
     public static class CompanyViewHolder extends RecyclerView.ViewHolder {
         TextView textViewName;
 
@@ -57,9 +56,7 @@ public class CompanyAdapter extends RecyclerView.Adapter<CompanyAdapter.CompanyV
         }
     }
 
-    /**
-     * Cập nhật danh sách công ty toàn bộ
-     */
+    // =============== UPDATE COMPANY LIST ===============
     public void setCompanyList(List<CompanyData> newList) {
         this.companyList = newList;
         notifyDataSetChanged();

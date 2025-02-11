@@ -1,10 +1,10 @@
-// FaceData.java
-
 package com.example.timekeeping;
 
 import java.util.List;
 
 public class FaceData {
+
+    // =============== FIELDS ===============
     private String userId;
     private String name;
     private String companyName;
@@ -12,6 +12,7 @@ public class FaceData {
     private double officeLatitude;
     private double officeLongitude;
 
+    // =============== CONSTRUCTORS ===============
     public FaceData() {
     }
 
@@ -24,6 +25,7 @@ public class FaceData {
         this.officeLongitude = officeLongitude;
     }
 
+    // =============== GETTERS & SETTERS ===============
     public String getUserId() {
         return userId;
     }

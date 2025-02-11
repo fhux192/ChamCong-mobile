@@ -22,25 +22,23 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Activity hiển thị danh sách công ty, cho phép vuốt xóa.
- * Sử dụng ValueEventListener để tự động tải lại khi xóa thành công.
- */
 public class CompanyList extends AppCompatActivity {
 
+    // =============== UI ELEMENTS ===============
     private RecyclerView recyclerViewCompanies;
     private CompanyAdapter companyAdapter;
     private List<CompanyData> companyList;
 
-    // Tham chiếu đến node "companies" trên Firebase
+    // =============== FIREBASE REFERENCE ===============
     private DatabaseReference companiesRef;
 
+    // =============== ACTIVITY LIFECYCLE METHODS ===============
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_company_list);
 
-        // Xử lý WindowInsets nếu cần
+        // =============== APPLY WINDOW INSETS ===============
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.mainContainerCompanyList),
                 (v, insets) -> {
@@ -50,32 +48,28 @@ public class CompanyList extends AppCompatActivity {
                 }
         );
 
-        // Khởi tạo tham chiếu node "companies"
+        // =============== INITIALIZE FIREBASE REFERENCE ===============
         companiesRef = FirebaseDatabase.getInstance().getReference("companies");
 
-        // Thiết lập RecyclerView
+        // =============== SETUP RECYCLER VIEW ===============
         recyclerViewCompanies = findViewById(R.id.recyclerViewCompanies);
         recyclerViewCompanies.setLayoutManager(new LinearLayoutManager(this));
         companyList = new ArrayList<>();
         companyAdapter = new CompanyAdapter(companyList);
         recyclerViewCompanies.setAdapter(companyAdapter);
 
-        // Đăng ký listener để tự động cập nhật khi dữ liệu thay đổi (realtime)
+        // =============== FETCH DATA FROM FIREBASE ===============
         fetchCompaniesData();
 
-        // Tạo khả năng vuốt xóa
+        // =============== INIT SWIPE TO DELETE ===============
         initSwipeToDelete();
     }
 
-    /**
-     * Đăng ký ValueEventListener để lắng nghe thay đổi tại node "companies".
-     * Mỗi lần xóa công ty (hoặc thêm, sửa), onDataChange() sẽ tự gọi -> cập nhật danh sách.
-     */
+    // =============== FETCH COMPANIES DATA ===============
     private void fetchCompaniesData() {
         companiesRef.addValueEventListener(new com.google.firebase.database.ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Clear danh sách cục bộ rồi thêm lại
                 companyList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     CompanyData company = snapshot.getValue(CompanyData.class);
@@ -84,7 +78,6 @@ public class CompanyList extends AppCompatActivity {
                         companyList.add(company);
                     }
                 }
-                // Cập nhật giao diện
                 companyAdapter.notifyDataSetChanged();
                 Log.d("CompanyListActivity", "Companies loaded: " + companyList.size());
             }
@@ -99,19 +92,16 @@ public class CompanyList extends AppCompatActivity {
         });
     }
 
-    /**
-     * Áp dụng ItemTouchHelper để vuốt xóa
-     */
+    // =============== INIT SWIPE TO DELETE ===============
     private void initSwipeToDelete() {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
-                0,  // Không hỗ trợ drag
-                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT // Vuốt trái/phải
+                0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT
         ) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView,
                                   @NonNull RecyclerView.ViewHolder viewHolder,
                                   @NonNull RecyclerView.ViewHolder target) {
-                // Không xử lý kéo item
                 return false;
             }
 
@@ -119,8 +109,6 @@ public class CompanyList extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 CompanyData companyToDelete = companyList.get(position);
-
-                // Xác nhận xóa
                 showDeleteDialog(companyToDelete, position);
             }
         });
@@ -128,23 +116,16 @@ public class CompanyList extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(recyclerViewCompanies);
     }
 
-    /**
-     * Hiển thị Dialog xác nhận xóa,
-     * Xóa trên Firebase -> onDataChange() tự gọi -> reload UI
-     */
+    // =============== SHOW DELETE DIALOG ===============
     private void showDeleteDialog(CompanyData companyToDelete, int position) {
         new AlertDialog.Builder(this)
                 .setTitle("Xóa công ty")
                 .setMessage("Bạn có chắc muốn xóa \"" + companyToDelete.getCompanyName() + "\" không?")
                 .setPositiveButton("Có", (dialog, which) -> {
-                    // Lấy key
                     String id = companyToDelete.getId();
                     if (id != null && !id.isEmpty()) {
-                        // Xóa trên Firebase
                         companiesRef.child(id).removeValue()
                                 .addOnSuccessListener(aVoid -> {
-                                    // KHÔNG cần gọi fetchCompaniesData()
-                                    // Vì onDataChange() sẽ tự động chạy -> reload
                                     Toast.makeText(CompanyList.this,
                                             "Đã xóa công ty thành công.",
                                             Toast.LENGTH_SHORT).show();
@@ -153,19 +134,16 @@ public class CompanyList extends AppCompatActivity {
                                     Toast.makeText(CompanyList.this,
                                             "Xóa không thành công: " + e.getMessage(),
                                             Toast.LENGTH_SHORT).show();
-                                    // Khôi phục item (do xóa thất bại)
                                     companyAdapter.notifyItemChanged(position);
                                 });
                     } else {
                         Toast.makeText(CompanyList.this,
                                 "Không có id. Không thể xóa!",
                                 Toast.LENGTH_SHORT).show();
-                        // Khôi phục item
                         companyAdapter.notifyItemChanged(position);
                     }
                 })
                 .setNegativeButton("Không", (dialog, which) -> {
-                    // Người dùng hủy xóa -> khôi phục item
                     companyAdapter.notifyItemChanged(position);
                 })
                 .setCancelable(false)

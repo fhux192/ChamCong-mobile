@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,30 +27,33 @@ import java.util.Map;
 
 public class CompanyRegister extends AppCompatActivity {
 
+    // =============== FIELDS ===============
     private TextInputEditText editTextCompanyName;
-    private Button buttonRegister;
+    private MaterialCardView buttonRegister;
     private ProgressBar progressBar;
     private DatabaseReference databaseReference;
-    private Handler handler = new Handler(); // Để trì hoãn kiểm tra
-    private Runnable checkDuplicateTask; // Tác vụ trì hoãn
+    private Handler handler = new Handler();
+    private Runnable checkDuplicateTask;
 
+    // =============== ACTIVITY LIFECYCLE ===============
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_company_register);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_FULLSCREEN);
-        // Khởi tạo Firebase Realtime Database
+
+        // INITIALIZE FIREBASE REFERENCE
         databaseReference = FirebaseDatabase.getInstance().getReference("companies");
 
-        // Liên kết các thành phần giao diện
+        // BIND UI COMPONENTS
         editTextCompanyName = findViewById(R.id.companyName);
         buttonRegister = findViewById(R.id.btn_register);
         progressBar = findViewById(R.id.progressBar);
 
-        // Lắng nghe sự thay đổi văn bản của trường tên công ty
+        // TEXT CHANGE LISTENER FOR REAL-TIME DUPLICATE CHECK
         editTextCompanyName.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {  }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -59,42 +63,32 @@ public class CompanyRegister extends AppCompatActivity {
                         handler.removeCallbacks(checkDuplicateTask);
                     }
                     checkDuplicateTask = () -> checkCompanyNameInRealTime(companyName);
-                    handler.postDelayed(checkDuplicateTask, 500); // Đợi 500ms trước khi kiểm tra
+                    handler.postDelayed(checkDuplicateTask, 500);
                 } else {
-                    editTextCompanyName.setError(null); // Xóa lỗi nếu trống
+                    editTextCompanyName.setError(null);
                 }
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {  }
         });
 
-        // Xử lý sự kiện khi người dùng nhấn nút đăng ký
+        // BUTTON CLICK LISTENER
         buttonRegister.setOnClickListener(view -> registerCompany());
     }
 
-    /**
-     * Xử lý sự kiện đăng ký công ty
-     */
+    // =============== REGISTER COMPANY ===============
     private void registerCompany() {
         progressBar.setVisibility(View.VISIBLE);
-
-        // Lấy thông tin từ các trường nhập liệu
         String companyName = editTextCompanyName.getText().toString().trim();
-
-        // Kiểm tra dữ liệu hợp lệ
         if (TextUtils.isEmpty(companyName)) {
             showToastAndHideProgress("Vui lòng nhập tên công ty");
             return;
         }
-
-        // Kiểm tra xem tên công ty có trùng không
         checkDuplicateCompanyName(companyName);
     }
 
-    /**
-     * Kiểm tra tên công ty có bị trùng không trong thời gian thực
-     */
+    // =============== REAL-TIME DUPLICATE CHECK ===============
     private void checkCompanyNameInRealTime(String companyName) {
         databaseReference.orderByChild("companyName").equalTo(companyName)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -103,10 +97,9 @@ public class CompanyRegister extends AppCompatActivity {
                         if (dataSnapshot.exists()) {
                             editTextCompanyName.setError("Tên công ty đã tồn tại");
                         } else {
-                            editTextCompanyName.setError(null); // Xóa lỗi nếu hợp lệ
+                            editTextCompanyName.setError(null);
                         }
                     }
-
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         Toast.makeText(CompanyRegister.this, "Lỗi kiểm tra tên công ty: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
@@ -114,9 +107,7 @@ public class CompanyRegister extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Kiểm tra tên công ty khi đăng ký
-     */
+    // =============== DUPLICATE CHECK WHEN REGISTER ===============
     private void checkDuplicateCompanyName(String companyName) {
         databaseReference.orderByChild("companyName").equalTo(companyName)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -129,7 +120,6 @@ public class CompanyRegister extends AppCompatActivity {
                             saveCompany(companyName);
                         }
                     }
-
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         progressBar.setVisibility(View.GONE);
@@ -138,15 +128,11 @@ public class CompanyRegister extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Lưu công ty vào Realtime Database
-     */
+    // =============== SAVE COMPANY TO FIREBASE ===============
     private void saveCompany(String companyName) {
         String companyId = databaseReference.push().getKey();
-
         Map<String, Object> companyData = new HashMap<>();
         companyData.put("companyName", companyName);
-
         if (companyId != null) {
             databaseReference.child(companyId).setValue(companyData).addOnCompleteListener(task -> {
                 progressBar.setVisibility(View.GONE);
@@ -166,9 +152,7 @@ public class CompanyRegister extends AppCompatActivity {
         }
     }
 
-    /**
-     * Hiển thị thông báo lỗi và ẩn ProgressBar
-     */
+    // =============== SHOW TOAST & HIDE PROGRESS ===============
     private void showToastAndHideProgress(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         progressBar.setVisibility(View.GONE);

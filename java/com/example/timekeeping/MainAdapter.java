@@ -13,16 +13,19 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 
 public class MainAdapter extends FirebaseRecyclerAdapter<MainModel, MainAdapter.myViewHolder> {
 
+    // =============== CONSTRUCTOR ===============
     public MainAdapter(@NonNull FirebaseRecyclerOptions<MainModel> options) {
         super(options);
     }
 
+    // =============== BIND VIEW HOLDER ===============
     @Override
     protected void onBindViewHolder(@NonNull myViewHolder holder, int position, @NonNull MainModel model) {
         holder.name.setText(model.getName());
-        //holder.embedding.setText(model.getEmbedding().toString());
+        // holder.embedding.setText(model.getEmbedding().toString());
     }
 
+    // =============== CREATE VIEW HOLDER ===============
     @NonNull
     @Override
     public myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -31,13 +34,12 @@ public class MainAdapter extends FirebaseRecyclerAdapter<MainModel, MainAdapter.
         return new myViewHolder(view);
     }
 
+    // =============== VIEW HOLDER CLASS ===============
     class myViewHolder extends RecyclerView.ViewHolder {
-
         TextView name, embedding;
 
         public myViewHolder(@NonNull View itemView) {
             super(itemView);
-
             name = itemView.findViewById(R.id.name);
             embedding = itemView.findViewById(R.id.embedding);
         }

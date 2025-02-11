@@ -1,4 +1,3 @@
-// File: ManagerRegister.java
 package com.example.timekeeping;
 
 import android.content.Intent;
@@ -8,7 +7,6 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -21,10 +19,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -36,8 +34,8 @@ import java.util.Random;
 
 public class ManagerRegister extends AppCompatActivity {
 
+    // =============== FIELDS ===============
     private static final String TAG = "ManagerRegister";
-
     private TextInputEditText editTextEmail, editTextName;
     private Spinner spinnerCompany;
     private MaterialCardView buttonRegister;
@@ -46,16 +44,18 @@ public class ManagerRegister extends AppCompatActivity {
     private List<String> companyList = new ArrayList<>();
     private FirebaseFirestore firestore;
 
+    // =============== ACTIVITY LIFECYCLE ===============
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manager_register);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_FULLSCREEN);
-        // Initialize Firebase Auth and Firestore
+
+        // INITIALIZE FIREBASE AUTH AND FIRESTORE
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
 
-        // Link UI components
+        // BIND UI COMPONENTS
         editTextEmail = findViewById(R.id.email);
         editTextName = findViewById(R.id.name);
         spinnerCompany = findViewById(R.id.spinnerCompany);
@@ -63,23 +63,15 @@ public class ManagerRegister extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         Spinner spinner = findViewById(R.id.spinnerCompany);
 
-// Tạo một adapter với layout tùy chỉnh
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                R.layout.spinner_item, // Layout tùy chỉnh cho item
-                companyList // Mảng dữ liệu
-        );
-
-// Áp dụng layout dropdown mặc định của hệ thống
+        // CREATE CUSTOM SPINNER ADAPTER
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, companyList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-// Gán adapter cho Spinner
         spinner.setAdapter(adapter);
 
-        // Load the list of companies
+        // LOAD COMPANY LIST
         loadCompanyList();
 
-        // Set up the register button click listener
+        // SET REGISTER BUTTON CLICK LISTENER
         buttonRegister.setOnClickListener(view -> {
             String name = String.valueOf(editTextName.getText()).trim();
             if (TextUtils.isEmpty(name)) {
@@ -90,9 +82,7 @@ public class ManagerRegister extends AppCompatActivity {
         });
     }
 
-    /**
-     * Load the list of companies from Realtime Database
-     */
+    // =============== LOAD COMPANY LIST ===============
     private void loadCompanyList() {
         DatabaseReference companiesRef = FirebaseDatabase.getInstance().getReference("companies");
         companiesRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -105,15 +95,12 @@ public class ManagerRegister extends AppCompatActivity {
                         companyList.add(companyName);
                     }
                 }
-
                 if (companyList.isEmpty()) {
                     Toast.makeText(ManagerRegister.this, "Không có công ty nào trong cơ sở dữ liệu.", Toast.LENGTH_SHORT).show();
                     Log.w(TAG, "Company list is empty.");
                 } else {
                     Log.d(TAG, "Loaded companies: " + companyList);
                 }
-
-                // Set up the Spinner adapter
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(ManagerRegister.this, android.R.layout.simple_spinner_item, companyList);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerCompany.setAdapter(adapter);
@@ -127,9 +114,7 @@ public class ManagerRegister extends AppCompatActivity {
         });
     }
 
-    /**
-     * Handle the registration process
-     */
+    // =============== HANDLE REGISTER ===============
     private void handleRegister(String name) {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -138,15 +123,12 @@ public class ManagerRegister extends AppCompatActivity {
 
         Log.d(TAG, "Attempting to register user: " + email + ", Company: " + selectedCompany);
 
-        // Check if email is empty
         if (TextUtils.isEmpty(email)) {
             Toast.makeText(ManagerRegister.this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
             Log.w(TAG, "Email is empty.");
             return;
         }
-
-        // Validate email format
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             editTextEmail.setError("Định dạng email không hợp lệ");
             editTextEmail.requestFocus();
@@ -154,8 +136,6 @@ public class ManagerRegister extends AppCompatActivity {
             Log.w(TAG, "Invalid email format: " + email);
             return;
         }
-
-        // Check if a company is selected
         if (TextUtils.isEmpty(selectedCompany)) {
             Toast.makeText(ManagerRegister.this, "Vui lòng chọn một công ty hợp lệ.", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
@@ -163,28 +143,22 @@ public class ManagerRegister extends AppCompatActivity {
             return;
         }
 
-        // Check if email is already registered in Firestore
         checkEmailInFirestore(email, name, selectedCompany);
     }
 
-    /**
-     * Check if the email is already registered in Firestore
-     */
+    // =============== CHECK EMAIL IN FIRESTORE ===============
     private void checkEmailInFirestore(String email, String name, String selectedCompany) {
         Log.d(TAG, "Checking if email exists in Firestore: " + email);
-        // Query Firestore to check if email exists
         firestore.collection("users")
                 .whereEqualTo("email", email)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (!task.getResult().isEmpty()) {
-                            // Email already exists
                             Toast.makeText(ManagerRegister.this, "Email này đã được đăng ký trên Firestore. Vui lòng sử dụng email khác.", Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);
                             Log.w(TAG, "Email already exists in Firestore: " + email);
                         } else {
-                            // Email chưa được đăng ký trên Firestore, tiếp tục đăng ký người dùng
                             Log.d(TAG, "Email không tồn tại trong Firestore. Tiếp tục đăng ký.");
                             createUser(email, name, selectedCompany);
                         }
@@ -197,20 +171,15 @@ public class ManagerRegister extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Create user with email and random password
-     */
+    // =============== CREATE USER ===============
     private void createUser(String email, String name, String selectedCompany) {
-        // Generate a random password
         String randomPassword = generateRandomPassword();
         Log.d(TAG, "Generated random password for user: " + randomPassword);
 
-        // Create user with email and random password
         mAuth.createUserWithEmailAndPassword(email, randomPassword)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "User created successfully in Firebase Authentication: " + email);
-                        // If account creation is successful, save user information
                         FirebaseUser currentUser = mAuth.getCurrentUser();
                         if (currentUser != null) {
                             Log.d(TAG, "Saving user data to databases for UID: " + currentUser.getUid());
@@ -222,7 +191,6 @@ public class ManagerRegister extends AppCompatActivity {
                         }
                     } else {
                         progressBar.setVisibility(View.GONE);
-                        // Handle exceptions if email already exists
                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                             Toast.makeText(ManagerRegister.this, "Email này đã được đăng ký. Vui lòng sử dụng email khác.", Toast.LENGTH_SHORT).show();
                             Log.w(TAG, "FirebaseAuthUserCollisionException: Email already in use: " + email);
@@ -234,9 +202,8 @@ public class ManagerRegister extends AppCompatActivity {
                     }
                 });
     }
-    /**
-     * Generate a random password
-     */
+
+    // =============== GENERATE RANDOM PASSWORD ===============
     private String generateRandomPassword() {
         int length = 10;
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
@@ -248,31 +215,20 @@ public class ManagerRegister extends AppCompatActivity {
         return password.toString();
     }
 
-    /**
-     * Save the user to Realtime Database and Firestore
-     *
-     * @param uid     User's UID from Firebase Auth
-     * @param email   User's email
-     * @param name    User's name
-     * @param company Selected company
-     */
-
+    // =============== SAVE USER TO DATABASE ===============
     private void saveUserToDatabase(String uid, String email, String name, String company) {
-        // Prepare user data
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("id", uid);
         userMap.put("name", name);
         userMap.put("email", email);
         userMap.put("company", company);
         userMap.put("role", "Manager");
-        userMap.put("status", "disable"); // Added status attribute with default value "enable"
+        userMap.put("status", "disable");
 
-        // Save to Realtime Database
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
         usersRef.child(uid).setValue(userMap).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Log.d(TAG, "User data saved to Realtime Database for UID: " + uid);
-                // After saving to Realtime Database, save to Firestore
                 saveUserToFirestore(uid, userMap);
             } else {
                 String errorMessage = task.getException() != null ? task.getException().getMessage() : "Lỗi khi lưu dữ liệu.";
@@ -283,13 +239,7 @@ public class ManagerRegister extends AppCompatActivity {
         });
     }
 
-    /**
-     * Save the user data to Firestore
-     *
-     * @param uid     User's UID from Firebase Auth
-     * @param userMap Map containing user data
-     */
-
+    // =============== SAVE USER TO FIRESTORE ===============
     private void saveUserToFirestore(String uid, Map<String, Object> userMap) {
         Log.d(TAG, "Saving user data to Firestore for UID: " + uid);
         firestore.collection("users").document(uid).set(userMap)
@@ -307,21 +257,14 @@ public class ManagerRegister extends AppCompatActivity {
                 });
     }
 
-    /**
-     * Send a password reset link to the user's email
-     *
-     * @param email User's email
-     */
-
+    // =============== SEND PASSWORD RESET LINK ===============
     private void sendPasswordResetLink(String email) {
         Log.d(TAG, "Sending password reset link to: " + email);
         mAuth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(ManagerRegister.this, "Liên kết đặt mật khẩu đã được gửi tới email: " + email, Toast.LENGTH_LONG).show();
                 Log.d(TAG, "Password reset email sent to: " + email);
-
-                // Navigate to the login screen
-                Intent intent = new Intent(ManagerRegister.this, Admin .class);
+                Intent intent = new Intent(ManagerRegister.this, Admin.class);
                 startActivity(intent);
                 finish();
             } else {

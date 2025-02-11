@@ -18,29 +18,30 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class Manager extends AppCompatActivity {
 
+    // =============== FIELDS ===============
     private Button buttonSignOut;
     private Button btnAddEmployee;
-    // Tên file SharedPreferences và các key cần thiết
     private static final String PREFS_NAME = "MyPrefs";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_REMEMBER_ME = "remember_me";
-
     private FirebaseAuth mAuth;
 
+    // =============== ACTIVITY LIFECYCLE ===============
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_manager);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_FULLSCREEN);
-        // Khởi tạo Firebase Auth
+
+        // INITIALIZE FIREBASE AUTH
         mAuth = FirebaseAuth.getInstance();
 
-        // Liên kết các thành phần giao diện
+        // BIND UI COMPONENTS
         buttonSignOut = findViewById(R.id.sign_out);
-        btnAddEmployee =findViewById(R.id.add_employee);
+        btnAddEmployee = findViewById(R.id.add_employee);
 
-        // Thiết lập sự kiện khi người dùng nhấn vào nút Sign Out
+        // SET CLICK LISTENER FOR SIGN OUT BUTTON
         buttonSignOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,7 +49,7 @@ public class Manager extends AppCompatActivity {
             }
         });
 
-        // Thiết lập padding cho các thanh hệ thống
+        // APPLY WINDOW INSETS
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -56,30 +57,22 @@ public class Manager extends AppCompatActivity {
         });
     }
 
-    /**
-     * Xử lý sự kiện đăng xuất
-     */
+    // =============== HELPER METHODS ===============
     private void handleSignOut() {
-        // Đăng xuất khỏi Firebase
+        // SIGN OUT FROM FIREBASE
         mAuth.signOut();
 
-        // Xóa thông tin lưu trữ (nếu cần)
+        // CLEAR SAVED PREFERENCES
         clearPreferences();
 
-        // Hiển thị thông báo đăng xuất thành công
+        // SHOW SUCCESS MESSAGE AND REDIRECT TO LOGIN
         Toast.makeText(Manager.this, "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
-
-        // Chuyển hướng trở lại trang đăng nhập
         Intent intent = new Intent(Manager.this, Login.class);
-        // Đảm bảo rằng người dùng không thể quay lại Activity Manager bằng nút back
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
     }
 
-    /**
-     * Xóa thông tin email khỏi SharedPreferences
-     */
     private void clearPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

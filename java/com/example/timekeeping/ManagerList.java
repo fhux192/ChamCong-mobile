@@ -1,4 +1,3 @@
-// File: ManagerList.java
 package com.example.timekeeping;
 
 import android.content.DialogInterface;
@@ -31,57 +30,59 @@ import java.util.List;
 
 public class ManagerList extends AppCompatActivity {
 
+    // =============== FIELDS ===============
     private RecyclerView recyclerView;
     private ManagerUserAdapter managerAdapter;
     private List<ManagerUserData> managerList;
 
+    // =============== FIRESTORE REFERENCES ===============
     private FirebaseFirestore db;
     private CollectionReference managersRef;
 
+    // =============== ACTIVITY LIFECYCLE ===============
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manager_list);
 
-        // Thiết lập padding cho window insets (nếu cần)
+        // APPLY WINDOW INSETS
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Kiểm tra xem người dùng đã đăng nhập chưa
+        // CHECK USER SIGN-IN STATUS
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            // Người dùng chưa đăng nhập, chuyển đến màn hình đăng nhập
             Intent intent = new Intent(ManagerList.this, Login.class);
             startActivity(intent);
             finish();
             return;
         }
 
-        // Khởi tạo Firestore
+        // INITIALIZE FIRESTORE
         db = FirebaseFirestore.getInstance();
-        managersRef = db.collection("users"); // Đảm bảo sử dụng đúng tên collection
+        managersRef = db.collection("users");
 
-        // Khởi tạo RecyclerView
+        // SETUP RECYCLER VIEW
         recyclerView = findViewById(R.id.recyclerViewManagers);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         managerList = new ArrayList<>();
         managerAdapter = new ManagerUserAdapter(managerList);
         recyclerView.setAdapter(managerAdapter);
 
-        // Lấy dữ liệu từ Firestore
+        // FETCH DATA FROM FIRESTORE
         fetchManagers();
 
-        // Thiết lập ItemTouchHelper cho Swipe-to-Update Status
+        // INITIALIZE ITEM TOUCH HELPER FOR SWIPE-TO-UPDATE
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
+    // =============== FETCH MANAGERS DATA ===============
     private void fetchManagers() {
-        // Sử dụng Listener để theo dõi thời gian thực với điều kiện role = "Manager"
         managersRef
-                .whereEqualTo("role", "Manager") // Thêm điều kiện lọc
+                .whereEqualTo("role", "Manager")
                 .addSnapshotListener(this, new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot snapshots,
@@ -98,7 +99,7 @@ public class ManagerList extends AppCompatActivity {
                             for (QueryDocumentSnapshot doc : snapshots) {
                                 if (doc.exists()) {
                                     ManagerUserData user = doc.toObject(ManagerUserData.class);
-                                    user.setId(doc.getId()); // Đặt ID nếu cần
+                                    user.setId(doc.getId());
                                     managerList.add(user);
                                     Log.d("ManagerList", "Added user: " + user.getName() + ", Status: " + user.getStatus());
                                 }
@@ -112,36 +113,29 @@ public class ManagerList extends AppCompatActivity {
                 });
     }
 
-    // Define SimpleCallback cho ItemTouchHelper
+    // =============== ITEM TOUCH HELPER CALLBACK ===============
     ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView,
                               @NonNull RecyclerView.ViewHolder viewHolder,
                               @NonNull RecyclerView.ViewHolder target) {
-            // Không hỗ trợ di chuyển mục
             return false;
         }
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            // Lấy vị trí của mục bị swipe
             int position = viewHolder.getAdapterPosition();
             ManagerUserData userToUpdate = managerList.get(position);
             String userId = userToUpdate.getId();
 
             if (userId != null && !userId.isEmpty()) {
-                // Hiển thị hộp thoại xác nhận trước khi cập nhật status
                 new AlertDialog.Builder(ManagerList.this)
                         .setTitle("Xác nhận")
                         .setMessage("Bạn có muốn thay đổi trạng thái của " + userToUpdate.getName() + " không?")
                         .setPositiveButton("Có", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
-                                // Đặt trạng thái mới
                                 String newStatus = "enable".equalsIgnoreCase(userToUpdate.getStatus()) ? "disable" : "enable";
-
-                                // Cập nhật trường status trong Firestore
                                 managersRef.document(userId)
                                         .update("status", newStatus)
                                         .addOnSuccessListener(aVoid -> {
@@ -151,7 +145,6 @@ public class ManagerList extends AppCompatActivity {
                                         .addOnFailureListener(e -> {
                                             Toast.makeText(ManagerList.this, "Lỗi khi cập nhật trạng thái.", Toast.LENGTH_SHORT).show();
                                             Log.w("ManagerList", "Error updating status for user: " + userToUpdate.getName(), e);
-                                            // Khôi phục mục bị swipe
                                             managerAdapter.notifyItemChanged(position);
                                         });
                             }
@@ -159,7 +152,6 @@ public class ManagerList extends AppCompatActivity {
                         .setNegativeButton("Không", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // Khôi phục mục bị swipe
                                 managerAdapter.notifyItemChanged(position);
                                 dialog.dismiss();
                             }

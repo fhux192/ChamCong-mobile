@@ -1,18 +1,18 @@
-// CheckData.java
-
 package com.example.timekeeping;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class CheckData {
+
+    // =============== FIELDS ===============
     private String userId;
     private String name;
     private String location;
     private long timestamp;
-    private String companyName; // Thêm thuộc tính companyName
+    private String companyName;
 
-    // Constructor mặc định cho Firebase
+    // =============== CONSTRUCTORS ===============
     public CheckData() {}
 
     public CheckData(String userId, String name, String location, long timestamp, String companyName) {
@@ -23,8 +23,7 @@ public class CheckData {
         this.companyName = companyName;
     }
 
-    // Getters và Setters
-
+    // =============== GETTERS & SETTERS ===============
     public String getUserId() {
         return userId;
     }
@@ -65,10 +64,13 @@ public class CheckData {
         this.companyName = companyName;
     }
 
+    // =============== OVERRIDE EQUALS & HASHCODE ===============
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof CheckData)) return false;
+        if (this == obj)
+            return true;
+        if (!(obj instanceof CheckData))
+            return false;
         CheckData other = (CheckData) obj;
         return userId != null && userId.equals(other.userId) &&
                 name != null && name.equals(other.name) &&

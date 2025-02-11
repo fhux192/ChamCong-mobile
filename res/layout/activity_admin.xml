@@ -40,6 +40,44 @@
             android:useDefaultMargins="true"
             android:layout_marginBottom="4dp">
 
+            <!-- Ô Thêm Công Ty -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/add_company"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#fff"
+                android:layout_columnWeight="1"
+                android:layout_margin="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/icon_add_company"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_add_company"
+                        android:contentDescription="@string/add_company"
+                        />
+
+                    <TextView
+                        android:id="@+id/text_add_company"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_company"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Ô Thêm Quản Lý -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/add_manager"
@@ -78,9 +116,9 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ô Thêm Công Ty -->
+            <!-- Ô Danh Sách Công Ty -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/add_company"
+                android:id="@+id/company_list"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="12dp"
@@ -97,18 +135,18 @@
                     android:padding="16dp">
 
                     <ImageView
-                        android:id="@+id/icon_add_company"
+                        android:id="@+id/icon_company_list"
                         android:layout_width="64dp"
                         android:layout_height="64dp"
-                        android:src="@drawable/ic_add_company"
-                        android:contentDescription="@string/add_company"
-                />
+                        android:src="@drawable/ic_company_list"
+                        android:contentDescription="@string/company_list"
+                        />
 
                     <TextView
-                        android:id="@+id/text_add_company"
+                        android:id="@+id/text_company_list"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/add_company"
+                        android:text="@string/company_list"
                         android:textStyle="bold"
                         android:textSize="16sp"
                         android:textColor="#333333"
@@ -154,54 +192,17 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ô Danh Sách Công Ty -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/company_list"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#fff"
-                android:layout_columnWeight="1"
-                android:layout_margin="8dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:id="@+id/icon_company_list"
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_company_list"
-                        android:contentDescription="@string/company_list"
-                     />
-
-                    <TextView
-                        android:id="@+id/text_company_list"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/company_list"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:layout_marginTop="8dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
         </GridLayout>
 
-        <!-- Ô Đăng Xuất (Chiếm 2 cột, full width) -->
+        <!-- Ô Đăng Xuất -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/sign_out"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
-            android:layout_margin="4dp"
+            android:layout_marginVertical="4dp"
+            android:layout_marginHorizontal="8dp"
             android:clickable="true"
             android:focusable="true"
             app:cardBackgroundColor="@color/dark_blue">

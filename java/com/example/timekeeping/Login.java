@@ -5,12 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Patterns;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button; // Đảm bảo import Button
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -20,10 +21,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.timekeeping.MainActivityCPP;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -32,32 +31,29 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Login extends AppCompatActivity {
 
+    // =============== FIELDS ===============
     private TextInputEditText editTextEmail, editTextPassword;
-    private Button buttonLogin, buttonEmployee; // Định nghĩa buttonEmployee là Button
+    private Button buttonLogin, buttonEmployee;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private ProgressBar progressBar;
     private TextView textViewRegisterNow;
     private CheckBox checkboxRememberMe;
 
-    // Tên file SharedPreferences
     private static final String PREFS_NAME = "MyPrefs";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_REMEMBER_ME = "remember_me";
 
+    // =============== ACTIVITY LIFECYCLE ===============
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_FULLSCREEN);
-
-        // Khởi tạo Firebase Auth và Firestore
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Liên kết các thành phần giao diện
         editTextEmail = findViewById(R.id.email);
         editTextPassword = findViewById(R.id.password);
         buttonLogin = findViewById(R.id.btn_login);
@@ -66,227 +62,147 @@ public class Login extends AppCompatActivity {
         textViewRegisterNow = findViewById(R.id.registerNow);
         checkboxRememberMe = findViewById(R.id.checkboxRememberMe);
 
-        // Kiểm tra nếu các view không tồn tại để tránh NullPointerException
         if (editTextEmail == null || editTextPassword == null || buttonLogin == null ||
                 buttonEmployee == null || progressBar == null || textViewRegisterNow == null ||
                 checkboxRememberMe == null) {
-            Toast.makeText(this, "Một số thành phần giao diện không được tìm thấy.", Toast.LENGTH_LONG).show();
-            finish(); // Dừng Activity nếu thiếu view
+            Toast.makeText(this, "Some UI components were not found.", Toast.LENGTH_LONG).show();
+            finish();
             return;
         }
 
-        // Tải thông tin đã lưu (nếu có)
         loadPreferences();
 
-        // Thiết lập sự kiện khi người dùng nhấn vào "Register Now"
-        textViewRegisterNow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // Ẩn bàn phím nếu đang mở
-                hideKeyboard();
-
-                // Chuyển hướng đến màn hình đăng ký
-                Intent intent = new Intent(Login.this, ForgotPassword.class);
-                startActivity(intent);
-            }
+        textViewRegisterNow.setOnClickListener(v -> {
+            hideKeyboard();
+            Intent intent = new Intent(Login.this, ForgotPassword.class);
+            startActivity(intent);
         });
 
-        // Thiết lập sự kiện khi người dùng nhấn vào nút đăng nhập
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                hideKeyboard(); // Ẩn bàn phím khi nhấn nút Đăng nhập
-                handleLogin();
-            }
+        buttonLogin.setOnClickListener(view -> {
+            hideKeyboard();
+            handleLogin();
         });
 
-        // Thiết lập sự kiện khi người dùng nhấn vào nút "Nhân Viên"
-        buttonEmployee.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                hideKeyboard(); // Ẩn bàn phím khi nhấn nút Nhân Viên
-                handleEmployeeLogin();
-            }
+        buttonEmployee.setOnClickListener(view -> {
+            hideKeyboard();
+            handleEmployeeLogin();
         });
-
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
-        // Sign out any existing user to ensure fresh login
         mAuth.signOut();
-
-        // Kiểm tra xem người dùng đã đăng nhập hay chưa (sẽ luôn là null sau signOut)
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null){
-            // Nên không bao giờ vào đây vì đã sign out
+        if (currentUser != null) {
             mAuth.signOut();
         }
     }
 
-    /**
-     * Xử lý sự kiện đăng nhập
-     */
+    // =============== HANDLE LOGIN ===============
     private void handleLogin() {
-        // Hiển thị ProgressBar
         progressBar.setVisibility(View.VISIBLE);
 
-        // Lấy thông tin email và mật khẩu từ người dùng
         String email = String.valueOf(editTextEmail.getText()).trim();
         String password = String.valueOf(editTextPassword.getText()).trim();
 
-        // Kiểm tra xem email có rỗng không
         if (TextUtils.isEmpty(email)) {
-            Toast.makeText(Login.this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Login.this, "Please enter email", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
             return;
         }
-
-        // Kiểm tra định dạng email
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            editTextEmail.setError("Định dạng email không hợp lệ");
+            editTextEmail.setError("Invalid email format");
             editTextEmail.requestFocus();
             progressBar.setVisibility(View.GONE);
             return;
         }
-
-        // Kiểm tra xem mật khẩu có rỗng không
         if (TextUtils.isEmpty(password)) {
-            Toast.makeText(Login.this, "Vui lòng nhập mật khẩu", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Login.this, "Please enter password", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
             return;
         }
-
-        // Kiểm tra độ dài mật khẩu
         if (password.length() < 6) {
-            editTextPassword.setError("Mật khẩu phải có ít nhất 6 ký tự");
+            editTextPassword.setError("Password must be at least 6 characters");
             editTextPassword.requestFocus();
             progressBar.setVisibility(View.GONE);
             return;
         }
 
-        // Thực hiện đăng nhập với Firebase Auth
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        // Ẩn ProgressBar khi hoàn thành
-                        progressBar.setVisibility(View.GONE);
+                .addOnCompleteListener(task -> {
+                    progressBar.setVisibility(View.GONE);
 
-                        if (task.isSuccessful()) {
-                            // Đăng nhập thành công
-                            // Chờ đến khi kiểm tra vai trò và trạng thái để hiển thị thông báo
-                            // Do đó, không hiển thị Toast "Đăng nhập thành công" ở đây
-
-                            // Lưu thông tin nếu "Remember Me" được chọn
-                            if (checkboxRememberMe.isChecked()) {
-                                savePreferences(email);
-                            } else {
-                                clearPreferences();
-                            }
-
-                            // Kiểm tra vai trò của người dùng và chuyển hướng
-                            checkUserRole(mAuth.getCurrentUser());
+                    if (task.isSuccessful()) {
+                        if (checkboxRememberMe.isChecked()) {
+                            savePreferences(email);
                         } else {
-                            // Đăng nhập thất bại
-                            String errorMessage = task.getException() != null ? task.getException().getMessage() : "Xác thực thất bại.";
-                            Toast.makeText(Login.this, "Xác thực thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            clearPreferences();
                         }
+                        checkUserRole(mAuth.getCurrentUser());
+                    } else {
+                        String errorMessage = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
+                        Toast.makeText(Login.this, "Authentication failed: " + errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    /**
-     * Xử lý sự kiện khi nhấn nút "Nhân Viên"
-     */
+    // =============== HANDLE EMPLOYEE LOGIN ===============
     private void handleEmployeeLogin() {
-        // Chuyển hướng trực tiếp đến MainActivityCPP mà không cần đăng nhập
         Intent intent = new Intent(Login.this, MainActivityCPP.class);
         startActivity(intent);
         finish();
     }
 
-    /**
-     * Kiểm tra vai trò của người dùng sau khi đăng nhập và chuyển hướng tương ứng
-     * Ngoài ra kiểm tra nếu vai trò là Manager thì phải có status là "enable"
-     * @param user Người dùng hiện tại
-     */
+    // =============== CHECK USER ROLE ===============
     private void checkUserRole(FirebaseUser user) {
         if (user == null) {
-            Toast.makeText(this, "Người dùng không hợp lệ.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Invalid user.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String uid = user.getUid();
         DocumentReference docRef = db.collection("users").document(uid);
-        docRef.get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                String role = document.getString("role");
-                                String status = document.getString("status"); // Lấy status
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    String role = document.getString("role");
+                    String status = document.getString("status");
 
-                                if (role != null) {
-                                    if (role.equalsIgnoreCase("Quản Trị Viên")) {
-                                        // Chuyển hướng đến AdminActivity
-                                        Toast.makeText(Login.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(Login.this, Admin.class);
-                                        startActivity(intent);
-                                        finish();
-                                    } else if (role.equalsIgnoreCase("Manager")) {
-                                        // Kiểm tra nếu status là "enable"
-                                        if ("enable".equalsIgnoreCase(status)) {
-                                            // Chuyển hướng đến ManagerActivity
-                                            Toast.makeText(Login.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-                                            Intent intent = new Intent(Login.this, MainActivityCPP.class);
-                                            startActivity(intent);
-                                            finish();
-                                        } else {
-                                            // Nếu status không phải "enable", từ chối đăng nhập
-                                            Toast.makeText(Login.this, "Tài khoản của bạn đã bị vô hiệu hóa!", Toast.LENGTH_LONG).show();
-                                            mAuth.signOut(); // Đăng xuất người dùng
-                                        }
-                                    } else {
-                                        // Vai trò không xác định
-                                        Toast.makeText(Login.this, "Vai trò không được xác định.", Toast.LENGTH_SHORT).show();
-                                        mAuth.signOut();
-                                        Intent intent = new Intent(Login.this, Login.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                } else {
-                                    // Trường role không tồn tại
-                                    Toast.makeText(Login.this, "Trường vai trò không tồn tại.", Toast.LENGTH_SHORT).show();
-                                    mAuth.signOut();
-                                    Intent intent = new Intent(Login.this, Login.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            } else {
-                                // Tài liệu không tồn tại
-                                Toast.makeText(Login.this, "Người dùng không tồn tại.", Toast.LENGTH_SHORT).show();
-                                mAuth.signOut();
-                                Intent intent = new Intent(Login.this, Login.class);
-                                startActivity(intent);
-                                finish();
-                            }
+                    if ("Quản Trị Viên".equalsIgnoreCase(role)) {
+                        Toast.makeText(Login.this, "Login successful", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(Login.this, Admin.class));
+                        finish();
+                    } else if ("Manager".equalsIgnoreCase(role)) {
+                        if ("enable".equalsIgnoreCase(status)) {
+                            Toast.makeText(Login.this, "Login successful", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(Login.this, MainActivityCPP.class));
+                            finish();
                         } else {
-                            // Lỗi Firestore
-                            String error = task.getException() != null ? task.getException().getMessage() : "Lỗi không xác định.";
-                            Toast.makeText(Login.this, "Lỗi khi lấy vai trò: " + error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Login.this, "Your account has been disabled!", Toast.LENGTH_LONG).show();
+                            mAuth.signOut();
                         }
+                    } else {
+                        Toast.makeText(Login.this, "Role not recognized.", Toast.LENGTH_SHORT).show();
+                        mAuth.signOut();
+                        startActivity(new Intent(Login.this, Login.class));
+                        finish();
                     }
-                });
+                } else {
+                    Toast.makeText(Login.this, "User does not exist.", Toast.LENGTH_SHORT).show();
+                    mAuth.signOut();
+                    startActivity(new Intent(Login.this, Login.class));
+                    finish();
+                }
+            } else {
+                String error = task.getException() != null ? task.getException().getMessage() : "Unknown error.";
+                Toast.makeText(Login.this, "Error retrieving role: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    /**
-     * Lưu thông tin email vào SharedPreferences
-     */
+    // =============== SAVE PREFERENCES ===============
     private void savePreferences(String email) {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -295,9 +211,7 @@ public class Login extends AppCompatActivity {
         editor.apply();
     }
 
-    /**
-     * Xóa thông tin email khỏi SharedPreferences
-     */
+    // =============== CLEAR PREFERENCES ===============
     private void clearPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -306,9 +220,7 @@ public class Login extends AppCompatActivity {
         editor.apply();
     }
 
-    /**
-     * Tải thông tin đã lưu từ SharedPreferences
-     */
+    // =============== LOAD PREFERENCES ===============
     private void loadPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String savedEmail = sharedPreferences.getString(KEY_EMAIL, "");
@@ -320,22 +232,15 @@ public class Login extends AppCompatActivity {
         }
     }
 
-    /**
-     * Thiết lập UI để ẩn bàn phím khi chạm ra ngoài EditText
-     */
+    // =============== SETUP UI (HIDE KEYBOARD ON TOUCH) ===============
     private void setupUI(View view) {
-        // Nếu không phải EditText, thêm OnTouchListener để ẩn bàn phím
         if (!(view instanceof TextInputEditText)) {
-            view.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    hideKeyboard();
-                    return false;
-                }
+            view.setOnTouchListener((v, event) -> {
+                hideKeyboard();
+                return false;
             });
         }
 
-        // Nếu là ViewGroup, duyệt đệ quy để thêm OnTouchListener
         if (view instanceof android.view.ViewGroup) {
             for (int i = 0; i < ((android.view.ViewGroup) view).getChildCount(); i++) {
                 View innerView = ((android.view.ViewGroup) view).getChildAt(i);
@@ -344,9 +249,7 @@ public class Login extends AppCompatActivity {
         }
     }
 
-    /**
-     * Phương thức hỗ trợ để ẩn bàn phím
-     */
+    // =============== HIDE KEYBOARD ===============
     private void hideKeyboard() {
         View view = this.getCurrentFocus();
         if (view != null) {

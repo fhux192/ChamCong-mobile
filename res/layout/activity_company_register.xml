@@ -40,18 +40,37 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center">
+        android:gravity="end">
         <!-- Nút đăng ký -->
-        <com.google.android.material.button.MaterialButton
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/btn_register"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Đăng ký"
-            android:backgroundTint="@color/dark_blue"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            />
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:gravity="end"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="@color/dark_blue">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp">
+
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Đăng Ký"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="#fff"
+                    android:gravity="center" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
         <!-- Thanh tiến trình -->

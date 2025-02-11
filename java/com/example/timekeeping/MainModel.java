@@ -3,9 +3,12 @@ package com.example.timekeeping;
 import java.util.List;
 
 public class MainModel {
+
+    // =============== FIELDS ===============
     private String name;
     private List<Float> embedding;
 
+    // =============== CONSTRUCTORS ===============
     // Constructor trống cho Firebase
     public MainModel() {
     }
@@ -16,7 +19,7 @@ public class MainModel {
         this.embedding = embedding;
     }
 
-    // Getter và Setter cho name
+    // =============== GETTERS & SETTERS ===============
     public String getName() {
         return name;
     }
@@ -25,7 +28,6 @@ public class MainModel {
         this.name = name;
     }
 
-    // Getter và Setter cho embedding
     public List<Float> getEmbedding() {
         return embedding;
     }

@@ -1,4 +1,3 @@
-// File: ManagerUserAdapter.java
 package com.example.timekeeping;
 
 import android.graphics.Color;
@@ -14,56 +13,56 @@ import java.util.List;
 
 public class ManagerUserAdapter extends RecyclerView.Adapter<ManagerUserAdapter.ManagerViewHolder> {
 
+    // =============== FIELDS ===============
     private List<ManagerUserData> managerList;
 
-    // Constructor
+    // =============== CONSTRUCTOR ===============
     public ManagerUserAdapter(List<ManagerUserData> managerList) {
         this.managerList = managerList;
     }
 
+    // =============== CREATE VIEW HOLDER ===============
     @NonNull
     @Override
     public ManagerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Inflate layout item_manager_users.xml
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_manager_users, parent, false);
         return new ManagerViewHolder(view);
     }
 
+    // =============== BIND DATA TO VIEW HOLDER ===============
     @Override
     public void onBindViewHolder(@NonNull ManagerViewHolder holder, int position) {
-        // Bind dữ liệu vào các TextView
         ManagerUserData user = managerList.get(position);
         holder.textViewName.setText(user.getName());
         holder.textViewEmail.setText("Email: " + user.getEmail());
         holder.textViewRole.setText("Vai trò: " + user.getRole());
         holder.textViewCompany.setText("Công ty: " + user.getCompany());
 
-        // Hiển thị status
         String status = user.getStatus();
         holder.textViewStatus.setText("Status: " + status);
 
-        // Thay đổi màu sắc dựa trên status
         if ("enable".equalsIgnoreCase(status)) {
-            holder.textViewStatus.setTextColor(Color.parseColor("#388E3C")); // Xanh lá
+            holder.textViewStatus.setTextColor(Color.parseColor("#388E3C"));
         } else if ("disable".equalsIgnoreCase(status)) {
-            holder.textViewStatus.setTextColor(Color.parseColor("#D32F2F")); // Đỏ
+            holder.textViewStatus.setTextColor(Color.parseColor("#D32F2F"));
         } else {
-            holder.textViewStatus.setTextColor(Color.parseColor("#000000")); // Đen cho các giá trị khác
+            holder.textViewStatus.setTextColor(Color.parseColor("#000000"));
         }
     }
 
+    // =============== RETURN ITEM COUNT ===============
     @Override
     public int getItemCount() {
         return managerList.size();
     }
 
-    // Phương thức để xóa mục tại vị trí position
+    // =============== REMOVE ITEM ===============
     public void removeItem(int position) {
         managerList.remove(position);
         notifyItemRemoved(position);
     }
 
-    // ViewHolder
+    // =============== VIEW HOLDER CLASS ===============
     public static class ManagerViewHolder extends RecyclerView.ViewHolder {
         TextView textViewName, textViewEmail, textViewRole, textViewCompany, textViewStatus;
 
@@ -73,11 +72,11 @@ public class ManagerUserAdapter extends RecyclerView.Adapter<ManagerUserAdapter.
             textViewEmail = itemView.findViewById(R.id.textViewEmail);
             textViewRole = itemView.findViewById(R.id.textViewRole);
             textViewCompany = itemView.findViewById(R.id.textViewCompany);
-            textViewStatus = itemView.findViewById(R.id.textViewStatus); // Liên kết TextViewStatus
+            textViewStatus = itemView.findViewById(R.id.textViewStatus);
         }
     }
 
-    // Cập nhật danh sách
+    // =============== UPDATE MANAGER LIST ===============
     public void setManagerList(List<ManagerUserData> managerList) {
         this.managerList = managerList;
         notifyDataSetChanged();
