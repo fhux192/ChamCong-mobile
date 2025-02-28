@@ -70,6 +70,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,7 +79,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivityCPP extends CameraActivity {
-
     // =============== TAG ===============
     private static final String TAG = "MainActivityCPP";
 
@@ -118,7 +118,7 @@ public class MainActivityCPP extends CameraActivity {
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     // =============== FACE RECOGNITION SETTINGS ===============
-    private float recognitionThreshold = 0.4f;
+    private float recognitionThreshold = 0.5f;
 
     // =============== SHARED PREFERENCES ===============
     private static final String PREFS_NAME = "MyPrefs";
@@ -127,6 +127,10 @@ public class MainActivityCPP extends CameraActivity {
 
     // =============== MANAGER'S COMPANY INFORMATION ===============
     private String managerCompanyName = null;
+
+    // =============== DIALOG'S INFORMATION ===============
+    String currentName = "Unknown";
+    String currentId = null;
 
     // =============== VOTING SYSTEM FOR RECOGNITION RESULTS ===============
     private Map<String, List<Vote>> faceVotes = new HashMap<>();
@@ -184,7 +188,7 @@ public class MainActivityCPP extends CameraActivity {
 
         mOpenCvCameraView = findViewById(R.id.opencv_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.GONE);
-        mOpenCvCameraView.setCameraIndex(1);
+        mOpenCvCameraView.setCameraIndex(0);
         mOpenCvCameraView.setCvCameraViewListener(cvCameraViewListener2);
         mOpenCvCameraView.setMaxFrameSize(640, 600);
 
@@ -284,7 +288,7 @@ public class MainActivityCPP extends CameraActivity {
                     // =============== FRAME INITIALIZATION ===============
                     Mat inputRgba = inputFrame.rgba();
                     Mat inputGray = inputFrame.gray();
-                    int MAX_FACES = 10;
+                    int MAX_FACES = 20;
                     float[] faceRects = new float[4 * MAX_FACES];
 
                     // =============== FACE DETECTION ===============
@@ -371,12 +375,13 @@ public class MainActivityCPP extends CameraActivity {
                                     lastAnnotations.put(voteKey, majorityName);
                                 }
                                 if (!processedFaces.contains(voteKey)) {
+                                    currentName=majorityName;
+                                    currentId=currentVoteUserId;
                                     handleRecognizedFace(majorityName, currentVoteUserId, voteKey);
                                     processedFaces.add(voteKey);
                                 }
                             }
                         }
-
                         drawNameLabel(inputRgba, x, y, majorityName, "Unknown".equalsIgnoreCase(majorityName));
                     }
 
@@ -435,19 +440,26 @@ public class MainActivityCPP extends CameraActivity {
 
     // =============== HANDLE RECOGNIZED FACE ===============
     private void handleRecognizedFace(String matchedName, String matchedUserId, String voteKey) {
+        // Kiểm tra nếu khuôn mặt đã bị hủy trước đó, không hiển thị Dialog
+        if (canceledMap.get(voteKey)) {
+            return; // Nếu đã bị hủy, không làm gì cả
+        }
+
         if (matchedUserId != null && !matchedUserId.equals(currentUserId)) {
             currentUserId = matchedUserId;
             Log.d(TAG, "Current user ID set to: " + currentUserId);
         }
+
         if ("Unknown".equalsIgnoreCase(matchedName)) {
             return;
         }
-        if (!canceledMap.get(voteKey)) {
-            if (isDialogVisible.compareAndSet(false, true)) {
-                runOnUiThread(() -> showRecognitionDialog(matchedName, voteKey));
-            }
-        }
+
+        // Kiểm tra nếu dialog đã được hiển thị
+//        if (isDialogVisible.compareAndSet(false, true)) {
+//            runOnUiThread(() -> showRecognitionDialog(matchedName, voteKey));
+//        }
     }
+
 
     private void drawNameLabel(Mat frame, float x, float y, String name, boolean isUnknown) {
         int fontFace = Imgproc.FONT_HERSHEY_SIMPLEX;
@@ -1103,30 +1115,32 @@ public class MainActivityCPP extends CameraActivity {
 
     // =============== INIT FACE DETECTION AND RECOGNITION ===============
     private void initFaceDetectionAndRecognition() {
-        try {
-            InputStream inputStream = getAssets().open("face_detection_yunet_2023mar.onnx");
-            FileUtil fileUtil = new FileUtil();
-            java.io.File detectionModelFile = fileUtil.createTempFile(this, inputStream,
-                    "face_detection_yunet_2023mar.onnx");
-            InitFaceDetector(detectionModelFile.getAbsolutePath());
-            Log.d(TAG, "Face Detector initialized with model: " + detectionModelFile.getAbsolutePath());
-        } catch (IOException e) {
-            Log.e(TAG, "Error initializing Face Detector: " + e.getMessage());
-            Toast.makeText(this, "Lỗi khởi tạo bộ phát hiện khuôn mặt: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        try {
-            InputStream inputStream = getAssets().open("sface_model2.onnx");
-            FileUtil fileUtil = new FileUtil();
-            java.io.File recognitionModelFile = fileUtil.createTempFile(this, inputStream,
-                    "sface_model2.onnx");
-            InitFaceRecognition(recognitionModelFile.getAbsolutePath());
-            Log.d(TAG, "Face Recognition initialized with model: " + recognitionModelFile.getAbsolutePath());
-        } catch (IOException e) {
-            Log.e(TAG, "Error initializing Face Recognition: " + e.getMessage());
-            Toast.makeText(this, "Lỗi khởi tạo nhận diện khuôn mặt: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
+        executorService.submit(() -> {
+            try {
+                InputStream inputStream = getAssets().open("face_detection_yunet_2023mar.onnx");
+                FileUtil fileUtil = new FileUtil();
+                java.io.File detectionModelFile = fileUtil.createTempFile(this, inputStream,
+                        "face_detection_yunet_2023mar.onnx");
+                InitFaceDetector(detectionModelFile.getAbsolutePath());
+                Log.d(TAG, "Face Detector initialized with model: " + detectionModelFile.getAbsolutePath());
+            } catch (IOException e) {
+                Log.e(TAG, "Error initializing Face Detector: " + e.getMessage());
+                Toast.makeText(this, "Lỗi khởi tạo bộ phát hiện khuôn mặt: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+            try {
+                InputStream inputStream = getAssets().open("sface_model2.onnx");
+                FileUtil fileUtil = new FileUtil();
+                java.io.File recognitionModelFile = fileUtil.createTempFile(this, inputStream,
+                        "sface_model2.onnx");
+                InitFaceRecognition(recognitionModelFile.getAbsolutePath());
+                Log.d(TAG, "Face Recognition initialized with model: " + recognitionModelFile.getAbsolutePath());
+            } catch (IOException e) {
+                Log.e(TAG, "Error initializing Face Recognition: " + e.getMessage());
+                Toast.makeText(this, "Lỗi khởi tạo nhận diện khuôn mặt: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+        });
     }
 
     // =============== DISPLAY REGISTERED FACES ===============
@@ -1437,6 +1451,8 @@ public class MainActivityCPP extends CameraActivity {
     }
 
     private void resetCanceledFaces() {
+        if (!Objects.equals(currentName, "Unknown"))
+            showRecognitionDialog(currentName,currentId);
         canceledFaces.clear();
     }
 
