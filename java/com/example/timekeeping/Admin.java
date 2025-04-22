@@ -20,8 +20,8 @@ public class Admin extends AppCompatActivity {
 
     // =============== UI ELEMENTS ===============
     private MaterialCardView buttonSignOut;
-    private MaterialCardView buttonAddCompany;   
-    private MaterialCardView buttonAddManager;      
+    private MaterialCardView buttonAddCompany;
+    private MaterialCardView buttonAddManager;
     private MaterialCardView buttonViewManagerList;
     private MaterialCardView buttonViewCompanyList;
 

@@ -8,7 +8,7 @@ public class ManagerUserData {
     private String email;
     private String role;
     private String company;
-    private String status; // THÊM TRƯỜNG STATUS
+    private String status;
 
     // =============== CONSTRUCTORS ===============
     public ManagerUserData() {}

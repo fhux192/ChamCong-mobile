@@ -28,7 +28,6 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"/>
 
-        <!-- GridLayout cho 4 ô đầu tiên -->
         <GridLayout
             android:id="@+id/dashboard_grid"
             android:layout_width="match_parent"
@@ -40,7 +39,6 @@
             android:useDefaultMargins="true"
             android:layout_marginBottom="4dp">
 
-            <!-- Ô Thêm Công Ty -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/add_company"
                 android:layout_width="0dp"
@@ -78,7 +76,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ô Thêm Quản Lý -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/add_manager"
                 android:layout_width="0dp"
@@ -116,7 +113,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ô Danh Sách Công Ty -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/company_list"
                 android:layout_width="0dp"
@@ -154,7 +150,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ô Danh Sách Quản Lý -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/manager_list"
                 android:layout_width="0dp"
@@ -194,7 +189,6 @@
 
         </GridLayout>
 
-        <!-- Ô Đăng Xuất -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/sign_out"
             android:layout_width="match_parent"

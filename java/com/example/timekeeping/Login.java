@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
@@ -17,21 +15,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.timekeeping.MainActivityCPP;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.material.textfield.TextInputEditText;
 
 public class Login extends AppCompatActivity {
 
-    // =============== FIELDS ===============
     private TextInputEditText editTextEmail, editTextPassword;
     private Button buttonLogin, buttonEmployee;
     private FirebaseAuth mAuth;
@@ -44,7 +38,6 @@ public class Login extends AppCompatActivity {
     private static final String KEY_EMAIL = "email";
     private static final String KEY_REMEMBER_ME = "remember_me";
 
-    // =============== ACTIVITY LIFECYCLE ===============
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +58,7 @@ public class Login extends AppCompatActivity {
         if (editTextEmail == null || editTextPassword == null || buttonLogin == null ||
                 buttonEmployee == null || progressBar == null || textViewRegisterNow == null ||
                 checkboxRememberMe == null) {
-            Toast.makeText(this, "Some UI components were not found.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Không tìm thấy một số thành phần giao diện.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
@@ -99,7 +92,6 @@ public class Login extends AppCompatActivity {
         }
     }
 
-    // =============== HANDLE LOGIN ===============
     private void handleLogin() {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -107,23 +99,23 @@ public class Login extends AppCompatActivity {
         String password = String.valueOf(editTextPassword.getText()).trim();
 
         if (TextUtils.isEmpty(email)) {
-            Toast.makeText(Login.this, "Please enter email", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Login.this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
             return;
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            editTextEmail.setError("Invalid email format");
+            editTextEmail.setError("Định dạng email không hợp lệ");
             editTextEmail.requestFocus();
             progressBar.setVisibility(View.GONE);
             return;
         }
         if (TextUtils.isEmpty(password)) {
-            Toast.makeText(Login.this, "Please enter password", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Login.this, "Vui lòng nhập mật khẩu", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
             return;
         }
         if (password.length() < 6) {
-            editTextPassword.setError("Password must be at least 6 characters");
+            editTextPassword.setError("Mật khẩu phải có ít nhất 6 ký tự");
             editTextPassword.requestFocus();
             progressBar.setVisibility(View.GONE);
             return;
@@ -141,23 +133,21 @@ public class Login extends AppCompatActivity {
                         }
                         checkUserRole(mAuth.getCurrentUser());
                     } else {
-                        String errorMessage = task.getException() != null ? task.getException().getMessage() : "Authentication failed.";
-                        Toast.makeText(Login.this, "Authentication failed: " + errorMessage, Toast.LENGTH_SHORT).show();
+                        String errorMessage = task.getException() != null ? task.getException().getMessage() : "Xác thực không thành công.";
+                        Toast.makeText(Login.this, "Đăng nhập thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    // =============== HANDLE EMPLOYEE LOGIN ===============
     private void handleEmployeeLogin() {
         Intent intent = new Intent(Login.this, MainActivityCPP.class);
         startActivity(intent);
         finish();
     }
 
-    // =============== CHECK USER ROLE ===============
     private void checkUserRole(FirebaseUser user) {
         if (user == null) {
-            Toast.makeText(this, "Invalid user.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Người dùng không hợp lệ.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -171,38 +161,37 @@ public class Login extends AppCompatActivity {
                     String status = document.getString("status");
 
                     if ("Quản Trị Viên".equalsIgnoreCase(role)) {
-                        Toast.makeText(Login.this, "Login successful", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Login.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(Login.this, Admin.class));
                         finish();
                     } else if ("Manager".equalsIgnoreCase(role)) {
                         if ("enable".equalsIgnoreCase(status)) {
-                            Toast.makeText(Login.this, "Login successful", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Login.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(Login.this, MainActivityCPP.class));
                             finish();
                         } else {
-                            Toast.makeText(Login.this, "Your account has been disabled!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(Login.this, "Tài khoản của bạn đã bị vô hiệu hóa!", Toast.LENGTH_LONG).show();
                             mAuth.signOut();
                         }
                     } else {
-                        Toast.makeText(Login.this, "Role not recognized.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Login.this, "Không xác định được quyền truy cập.", Toast.LENGTH_SHORT).show();
                         mAuth.signOut();
                         startActivity(new Intent(Login.this, Login.class));
                         finish();
                     }
                 } else {
-                    Toast.makeText(Login.this, "User does not exist.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Login.this, "Không tìm thấy người dùng.", Toast.LENGTH_SHORT).show();
                     mAuth.signOut();
                     startActivity(new Intent(Login.this, Login.class));
                     finish();
                 }
             } else {
-                String error = task.getException() != null ? task.getException().getMessage() : "Unknown error.";
-                Toast.makeText(Login.this, "Error retrieving role: " + error, Toast.LENGTH_SHORT).show();
+                String error = task.getException() != null ? task.getException().getMessage() : "Lỗi không xác định.";
+                Toast.makeText(Login.this, "Lỗi khi kiểm tra vai trò: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // =============== SAVE PREFERENCES ===============
     private void savePreferences(String email) {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -211,7 +200,6 @@ public class Login extends AppCompatActivity {
         editor.apply();
     }
 
-    // =============== CLEAR PREFERENCES ===============
     private void clearPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -220,7 +208,6 @@ public class Login extends AppCompatActivity {
         editor.apply();
     }
 
-    // =============== LOAD PREFERENCES ===============
     private void loadPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String savedEmail = sharedPreferences.getString(KEY_EMAIL, "");
@@ -232,24 +219,6 @@ public class Login extends AppCompatActivity {
         }
     }
 
-    // =============== SETUP UI (HIDE KEYBOARD ON TOUCH) ===============
-    private void setupUI(View view) {
-        if (!(view instanceof TextInputEditText)) {
-            view.setOnTouchListener((v, event) -> {
-                hideKeyboard();
-                return false;
-            });
-        }
-
-        if (view instanceof android.view.ViewGroup) {
-            for (int i = 0; i < ((android.view.ViewGroup) view).getChildCount(); i++) {
-                View innerView = ((android.view.ViewGroup) view).getChildAt(i);
-                setupUI(innerView);
-            }
-        }
-    }
-
-    // =============== HIDE KEYBOARD ===============
     private void hideKeyboard() {
         View view = this.getCurrentFocus();
         if (view != null) {

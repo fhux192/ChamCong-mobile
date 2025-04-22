@@ -9,11 +9,9 @@ public class MainModel {
     private List<Float> embedding;
 
     // =============== CONSTRUCTORS ===============
-    // Constructor trống cho Firebase
     public MainModel() {
     }
 
-    // Constructor đầy đủ
     public MainModel(String name, List<Float> embedding) {
         this.name = name;
         this.embedding = embedding;

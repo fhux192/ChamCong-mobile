@@ -17,7 +17,6 @@
         android:padding="16dp"
         android:background="?android:attr/selectableItemBackground">
 
-        <!-- Tên công ty (Company Name) -->
         <TextView
             android:id="@+id/textViewCompanyName"
             android:layout_width="wrap_content"

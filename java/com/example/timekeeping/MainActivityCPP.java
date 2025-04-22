@@ -81,14 +81,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MainActivityCPP extends CameraActivity {
     // =============== TAG ===============
     private static final String TAG = "MainActivityCPP";
-
+    private static final Object NATIVE_LOCK = new Object();
     // =============== UI ELEMENTS ===============
     private CameraBridgeViewBase mOpenCvCameraView;
     private Button galleryBtn;
+    private Button showChecksBtn;
     private Button showFacesBtn;
     private Button resetRecognitionBtn;
     private Button signInBtn;
     private Button signOutBtn;
+
+    private Button showCheckedListBtn;
     private ImageView imageView;
 
     // =============== PERMISSION CODES ===============
@@ -140,6 +143,9 @@ public class MainActivityCPP extends CameraActivity {
     private static final int VOTE_THRESHOLD = 1;
     private static final long TIMEOUT = 5000;
 
+    // =============== CONCURRENCY CONTROL ===============
+    private final AtomicBoolean autoDialogEnabled = new AtomicBoolean(true);
+
     private static class Vote {
         String name;
         String userId;
@@ -148,7 +154,7 @@ public class MainActivityCPP extends CameraActivity {
             this.userId = userId;
         }
     }
-
+    private String lastRecognizedName = null;
     // =============== OPENCV INITIALIZATION ===============
     static {
         if (!OpenCVLoader.initLocal()) {
@@ -166,25 +172,23 @@ public class MainActivityCPP extends CameraActivity {
     public native float CalculateSimilarity(float[] emb1, float[] emb2);
 
     // =============== ACTIVITY LIFECYCLE METHODS ===============
+    // ========================================================
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         try {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-            Log.d(TAG, "Firebase persistence enabled.");
-        } catch (DatabaseException e) {
-            Log.w(TAG, "Persistence already enabled.");
-        }
+        } catch (DatabaseException e) { /* ignore */ }
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main_cpp);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            currentUserId = currentUser.getUid();
-        }
+        if (currentUser != null) currentUserId = currentUser.getUid();
 
         mOpenCvCameraView = findViewById(R.id.opencv_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.GONE);
@@ -192,49 +196,45 @@ public class MainActivityCPP extends CameraActivity {
         mOpenCvCameraView.setCvCameraViewListener(cvCameraViewListener2);
         mOpenCvCameraView.setMaxFrameSize(640, 600);
 
-        imageView = findViewById(R.id.imageView);
-        galleryBtn = findViewById(R.id.galleryBtn);
-        showFacesBtn = findViewById(R.id.showFacesBtn);
+        imageView           = findViewById(R.id.imageView);
+        galleryBtn          = findViewById(R.id.galleryBtn);
+        showFacesBtn        = findViewById(R.id.showFacesBtn);
         resetRecognitionBtn = findViewById(R.id.resetRecognitionBtn);
-        Button showChecksBtn = findViewById(R.id.showCheckedListBtn);
-        signOutBtn = findViewById(R.id.signOutBtn);
-        signInBtn = findViewById(R.id.signInBtn);
+        showChecksBtn       = findViewById(R.id.showCheckedListBtn);
+        signOutBtn          = findViewById(R.id.signOutBtn);
+        signInBtn           = findViewById(R.id.signInBtn);
 
         galleryBtn.setVisibility(View.GONE);
         showFacesBtn.setVisibility(View.GONE);
 
-        galleryBtn.setOnClickListener(view -> openGallery());
-        showFacesBtn.setOnClickListener(view -> displayRegisteredFaces());
-        resetRecognitionBtn.setOnClickListener(view -> resetCanceledFaces());
-        showChecksBtn.setOnClickListener(view -> displaySavedChecks());
-        signOutBtn.setOnClickListener(view -> handleSignOut());
-        signInBtn.setOnClickListener(view -> handleSignIn());
+        galleryBtn.setOnClickListener(v -> openGallery());
+        showFacesBtn.setOnClickListener(v -> displayRegisteredFaces());
+        resetRecognitionBtn.setOnClickListener(v -> resetCanceledFaces());
+        showChecksBtn.setOnClickListener(v -> displaySavedChecks());
+        signOutBtn.setOnClickListener(v -> handleSignOut());
+        signInBtn.setOnClickListener(v -> handleSignIn());
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) return;
-                for (Location location : locationResult.getLocations()) {
-                    currentLocation = location;
-                    Log.d(TAG, "Location updated: " + location.getLatitude() + ", " + location.getLongitude());
-                }
+        locationCallback    = new LocationCallback() {
+            @Override public void onLocationResult(LocationResult r) {
+                if (r == null) return;
+                for (Location l : r.getLocations()) currentLocation = l;
             }
         };
+
+        showChecksBtn.setEnabled(true);
 
         loadRecognitionThreshold();
         requestPermissions();
 
-        faceDataRef = FirebaseDatabase.getInstance().getReference("faceDataList");
-        Log.d(TAG, "Firebase Database reference initialized.");
-        loadFaceDataList();
-
+        faceDataRef  = FirebaseDatabase.getInstance().getReference("faceDataList");
         checkDataRef = FirebaseDatabase.getInstance().getReference("checkDataList");
-        Log.d(TAG, "Firebase Database reference for check data initialized.");
-        loadCheckDataList();
 
+        loadFaceDataList();
+        loadCheckDataList();
         checkUserRoleAndAdjustUI();
     }
+
 
     @Override
     protected void onResume() {
@@ -325,7 +325,10 @@ public class MainActivityCPP extends CameraActivity {
                         Imgproc.rectangle(inputRgba, new Point(x, y), new Point(x + w, y + h), boxColor, boxThickness);
 
                         // =============== FACE RECOGNITION ===============
-                        float[] cameraFrameEmbedding = ExtractFaceEmbedding(inputRgba.getNativeObjAddr());
+                        float[] cameraFrameEmbedding;
+                        synchronized (NATIVE_LOCK) {
+                            cameraFrameEmbedding = ExtractFaceEmbedding(inputRgba.getNativeObjAddr());
+                        }
                         String currentVoteName = "Unknown";
                         String currentVoteUserId = null;
                         float highestSimilarity = 0.0f;
@@ -439,26 +442,25 @@ public class MainActivityCPP extends CameraActivity {
     }
 
     // =============== HANDLE RECOGNIZED FACE ===============
-    private void handleRecognizedFace(String matchedName, String matchedUserId, String voteKey) {
-        // Kiểm tra nếu khuôn mặt đã bị hủy trước đó, không hiển thị Dialog
-        if (canceledMap.get(voteKey)) {
-            return; // Nếu đã bị hủy, không làm gì cả
-        }
+    // ========================================================
+    private void handleRecognizedFace(String matchedName,
+                                      String matchedUserId,
+                                      String voteKey) {
+
+        if (canceledMap.get(voteKey)) return;
+        if ("Unknown".equalsIgnoreCase(matchedName)) return;
+        lastRecognizedName = matchedName;
+        if (!autoDialogEnabled.get()) return;
 
         if (matchedUserId != null && !matchedUserId.equals(currentUserId)) {
             currentUserId = matchedUserId;
-            Log.d(TAG, "Current user ID set to: " + currentUserId);
         }
 
-        if ("Unknown".equalsIgnoreCase(matchedName)) {
-            return;
+        if (isDialogVisible.compareAndSet(false, true)) {
+            runOnUiThread(() -> showRecognitionDialog(matchedName, voteKey));
         }
-
-        // Kiểm tra nếu dialog đã được hiển thị
-//        if (isDialogVisible.compareAndSet(false, true)) {
-//            runOnUiThread(() -> showRecognitionDialog(matchedName, voteKey));
-//        }
     }
+
 
 
     private void drawNameLabel(Mat frame, float x, float y, String name, boolean isUnknown) {
@@ -519,6 +521,7 @@ public class MainActivityCPP extends CameraActivity {
         timeHandler.post(timeUpdater);
 
         builder.setPositiveButton("Chấm công", (dialog, which) -> {
+            autoDialogEnabled.set(false);
             canceledMap.put(voteKey, false);
             if (!handleCheckIn(recognizedName, locationTextView.getText().toString())) {
                 isDialogVisible.set(false);
@@ -526,11 +529,13 @@ public class MainActivityCPP extends CameraActivity {
             timeHandler.removeCallbacks(timeUpdater);
         });
         builder.setNegativeButton("Hủy", (dialog, which) -> {
+            autoDialogEnabled.set(false);
             canceledMap.put(voteKey, true);
             isDialogVisible.set(false);
             timeHandler.removeCallbacks(timeUpdater);
         });
         builder.setOnCancelListener(dialog -> {
+            autoDialogEnabled.set(false);
             isDialogVisible.set(false);
             timeHandler.removeCallbacks(timeUpdater);
         });
@@ -552,11 +557,19 @@ public class MainActivityCPP extends CameraActivity {
 
     // =============== HANDLE CHECK-IN LOGIC ===============
     private boolean handleCheckIn(String recognizedName, String locationText) {
+        FaceData faceData = getFaceDataByName(recognizedName);
+        if (faceData == null) {                     //  ← vẫn giữ nguyên khối kiểm tra
+            Toast.makeText(this, "...", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        /* ➊  Thêm dòng này: */
+        currentUserId = faceData.getUserId();       // luôn cập‑nhật UID mới nhất
+        Log.d(TAG, "currentUserId set to " + currentUserId);
         if (currentUserId == null) {
             Toast.makeText(MainActivityCPP.this, "Không xác định được ID người dùng.", Toast.LENGTH_LONG).show();
             return false;
         }
-        FaceData faceData = getFaceDataByName(recognizedName);
         if (faceData == null) {
             Toast.makeText(MainActivityCPP.this, "Không tìm thấy thông tin người dùng.", Toast.LENGTH_LONG).show();
             return false;
@@ -1129,10 +1142,10 @@ public class MainActivityCPP extends CameraActivity {
                 e.printStackTrace();
             }
             try {
-                InputStream inputStream = getAssets().open("sface_model2.onnx");
+                InputStream inputStream = getAssets().open("sface_fp16.onnx");
                 FileUtil fileUtil = new FileUtil();
                 java.io.File recognitionModelFile = fileUtil.createTempFile(this, inputStream,
-                        "sface_model2.onnx");
+                        "sface_fp16.onnx");
                 InitFaceRecognition(recognitionModelFile.getAbsolutePath());
                 Log.d(TAG, "Face Recognition initialized with model: " + recognitionModelFile.getAbsolutePath());
             } catch (IOException e) {
@@ -1255,155 +1268,104 @@ public class MainActivityCPP extends CameraActivity {
 
     // =============== DISPLAY SAVED CHECKS ===============
     private void displaySavedChecks() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
-            DatabaseReference userRoleRef = FirebaseDatabase.getInstance()
-                    .getReference("users")
-                    .child(userId)
-                    .child("role");
-            userRoleRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String role = snapshot.getValue(String.class);
-                    Log.d(TAG, "User role: " + role);
-                    if ("Manager".equalsIgnoreCase(role)) {
-                        DatabaseReference userCompanyRef = FirebaseDatabase.getInstance()
-                                .getReference("users")
-                                .child(userId)
-                                .child("company");
-                        userCompanyRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                String companyName = snapshot.getValue(String.class);
-                                if (companyName == null || companyName.isEmpty()) {
-                                    Toast.makeText(MainActivityCPP.this,
-                                            "Không tìm thấy tên công ty của bạn.",
-                                            Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                List<CheckData> filteredChecks = new ArrayList<>();
-                                for (CheckData cd : checkDataMap.values()) {
-                                    if (cd.getCompanyName() != null && cd.getCompanyName().equalsIgnoreCase(companyName)) {
-                                        filteredChecks.add(cd);
-                                    }
-                                }
-                                if (filteredChecks.isEmpty()) {
-                                    Toast.makeText(MainActivityCPP.this,
-                                            "Chưa có lượt check nào được lưu cho công ty của bạn.",
-                                            Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                Collections.sort(filteredChecks, (cd1, cd2) -> Long.compare(cd2.getTimestamp(), cd1.getTimestamp()));
-                                ListView listView = new ListView(MainActivityCPP.this);
-                                List<String> checkInfoList = new ArrayList<>();
-                                for (CheckData cd : filteredChecks) {
-                                    String formattedTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-                                            Locale.getDefault()).format(new Date(cd.getTimestamp()));
-                                    String info = "Tên: " + cd.getName() + "\n"
-                                            + "Vị trí: " + cd.getLocation() + "\n"
-                                            + "Thời gian: " + formattedTime;
-                                    checkInfoList.add(info);
-                                }
-                                ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                                        MainActivityCPP.this,
-                                        android.R.layout.simple_list_item_1,
-                                        checkInfoList);
-                                listView.setAdapter(adapter);
-                                listView.setOnItemLongClickListener((parent, view, position, id) -> {
-                                    CheckData selectedCheck = filteredChecks.get(position);
-                                    String selectedCheckId = null;
-                                    for (Map.Entry<String, CheckData> entry : checkDataMap.entrySet()) {
-                                        if (entry.getValue().equals(selectedCheck)) {
-                                            selectedCheckId = entry.getKey();
-                                            break;
+        String activeUid = (currentUserId != null)
+                ? currentUserId
+                : (mAuth.getCurrentUser() != null
+                ? mAuth.getCurrentUser().getUid()
+                : null);
+
+        if (activeUid == null) {
+            Toast.makeText(this, "Chưa xác định được người dùng.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DatabaseReference roleRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(activeUid)
+                .child("role");
+
+        roleRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snap) {
+
+                String role = snap.getValue(String.class);
+                boolean isManager = "Manager".equalsIgnoreCase(role);
+
+                List<CheckData> result = new ArrayList<>();
+
+                if (isManager) {
+
+                    String company = snap.getRef().getParent().child("company").getKey();
+                    snap.getRef().getParent().child("company")
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot cSnap) {
+                                    String companyName = cSnap.getValue(String.class);
+                                    if (companyName == null) companyName = "";
+
+                                    for (CheckData cd : checkDataMap.values()) {
+                                        if (companyName.equalsIgnoreCase(cd.getCompanyName())) {
+                                            result.add(cd);
                                         }
                                     }
-                                    if (selectedCheckId != null) {
-                                        showDeleteCheckDialog(selectedCheckId, selectedCheck);
-                                    } else {
-                                        Toast.makeText(MainActivityCPP.this,
-                                                "Không tìm thấy ID của lượt check này.",
-                                                Toast.LENGTH_SHORT).show();
-                                    }
-                                    return true;
-                                });
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityCPP.this);
-                                builder.setTitle("Lịch sử Check công ty: " + companyName);
-                                builder.setView(listView);
-                                builder.setNegativeButton("Đóng",
-                                        (dialog, which) -> dialog.dismiss());
-                                builder.show();
-                            }
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Log.e(TAG, "Failed to read manager's company name: " + error.getMessage());
-                                Toast.makeText(MainActivityCPP.this,
-                                        "Lỗi khi lấy tên công ty của bạn.",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e(TAG, "Failed to read user role: " + error.getMessage());
-                    Toast.makeText(MainActivityCPP.this,
-                            "Lỗi khi lấy thông tin vai trò người dùng.",
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            List<CheckData> userChecks = new ArrayList<>();
-            for (CheckData cd : checkDataMap.values()) {
-                if (cd.getUserId().equals(currentUserId)) {
-                    userChecks.add(cd);
-                }
-            }
-            if (userChecks.isEmpty()) {
-                Toast.makeText(MainActivityCPP.this,
-                        "Chưa có lượt check nào được lưu cho bạn.",
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Collections.sort(userChecks, (cd1, cd2) -> Long.compare(cd2.getTimestamp(), cd1.getTimestamp()));
-            ListView listView = new ListView(MainActivityCPP.this);
-            List<String> checkInfoList = new ArrayList<>();
-            for (CheckData cd : userChecks) {
-                String formattedTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-                        Locale.getDefault()).format(new Date(cd.getTimestamp()));
-                String info = "Tên: " + cd.getName() + "\n"
-                        + "Vị trí: " + cd.getLocation() + "\n"
-                        + "Thời gian: " + formattedTime;
-                checkInfoList.add(info);
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivityCPP.this,
-                    android.R.layout.simple_list_item_1, checkInfoList);
-            listView.setAdapter(adapter);
-            listView.setOnItemLongClickListener((parent, view, position, id) -> {
-                CheckData selectedCheck = userChecks.get(position);
-                String selectedCheckId = null;
-                for (Map.Entry<String, CheckData> entry : checkDataMap.entrySet()) {
-                    if (entry.getValue().equals(selectedCheck)) {
-                        selectedCheckId = entry.getKey();
-                        break;
-                    }
-                }
-                if (selectedCheckId != null) {
-                    showDeleteCheckDialog(selectedCheckId, selectedCheck);
+                                    showChecksDialog(result,
+                                            "Lịch sử Check công ty: " + companyName);
+                                }
+                                @Override public void onCancelled(@NonNull DatabaseError e){}
+                            });
                 } else {
-                    Toast.makeText(MainActivityCPP.this,
-                            "Không tìm thấy ID của lượt check này.",
-                            Toast.LENGTH_SHORT).show();
+
+                    for (CheckData cd : checkDataMap.values()) {
+                        if (lastRecognizedName != null &&
+                                lastRecognizedName.equalsIgnoreCase(cd.getName())) {
+                            result.add(cd);
+                        }
+                    }
+
+                    showChecksDialog(result, "Lịch sử Check của bạn");
                 }
-                return true;
-            });
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivityCPP.this);
-            builder.setTitle("Lịch sử Check của bạn");
-            builder.setView(listView);
-            builder.setNegativeButton("Đóng", (dialog, which) -> dialog.dismiss());
-            builder.show();
+            }
+            @Override public void onCancelled(@NonNull DatabaseError err) {
+                Toast.makeText(MainActivityCPP.this,
+                        "Lỗi khi đọc quyền: "+err.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void showChecksDialog(List<CheckData> list, String title) {
+        if (list.isEmpty()) {
+            Toast.makeText(this, "Chưa có lượt check nào để hiển thị.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        Collections.sort(list, (a,b)->Long.compare(b.getTimestamp(), a.getTimestamp()));
+
+        ListView lv = new ListView(this);
+        List<String> lines = new ArrayList<>();
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+        for (CheckData c : list) {
+            lines.add("Tên: " + c.getName() + "\n"
+                    + "Vị trí: " + c.getLocation() + "\n"
+                    + "Thời gian: " + f.format(new Date(c.getTimestamp())) );
+        }
+        lv.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, lines));
+
+        lv.setOnItemLongClickListener((p,v,pos,id)->{
+            CheckData cd = list.get(pos);
+            String key = null;
+            for (Map.Entry<String,CheckData> e: checkDataMap.entrySet()){
+                if (e.getValue().equals(cd)){ key=e.getKey(); break; }
+            }
+            if (key!=null) showDeleteCheckDialog(key, cd);
+            return true;
+        });
+
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setView(lv)
+                .setNegativeButton("Đóng", (d,w)->d.dismiss())
+                .show();
     }
 
     // =============== GET FACE DATA BY NAME ===============
@@ -1451,10 +1413,16 @@ public class MainActivityCPP extends CameraActivity {
     }
 
     private void resetCanceledFaces() {
-        if (!Objects.equals(currentName, "Unknown"))
-            showRecognitionDialog(currentName,currentId);
+        if (!Objects.equals(currentName, "Unknown")) {
+            showRecognitionDialog(currentName, currentId);
+        } else {
+            Toast.makeText(MainActivityCPP.this,
+                    "Chưa nhận diện được khuôn mặt nào để chấm công.",
+                    Toast.LENGTH_SHORT).show();
+        }
         canceledFaces.clear();
     }
+
 
     // =============== HANDLE SIGN IN ===============
     private void handleSignIn() {
@@ -1516,6 +1484,7 @@ public class MainActivityCPP extends CameraActivity {
                                     showFacesBtn.setVisibility(View.GONE);
                                     return;
                                 }
+                                resetRecognitionBtn.setVisibility(View.GONE);
                                 signOutBtn.setVisibility(View.VISIBLE);
                                 signInBtn.setVisibility(View.GONE);
                                 galleryBtn.setVisibility(View.VISIBLE);
@@ -1563,7 +1532,7 @@ public class MainActivityCPP extends CameraActivity {
 
     // =============== LOAD RECOGNITION THRESHOLD ===============
     private void loadRecognitionThreshold() {
-        float defaultThreshold = 0.5f;
+        float defaultThreshold = 0.4f;
         recognitionThreshold = getSharedPreferences("app_prefs", MODE_PRIVATE)
                 .getFloat("recognition_threshold", defaultThreshold);
         Log.d(TAG, "Loaded recognition threshold: " + recognitionThreshold);

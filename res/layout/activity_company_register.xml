@@ -19,7 +19,6 @@
             android:textColor="#fff"
             android:text="Thêm công ty" />
 
-        <!-- Trường nhập tên công ty -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -32,6 +31,7 @@
                 android:textStyle="bold"
                 android:hint="Nhập tên công ty"
                 android:textColorHint="#fff"
+                android:textColor="#fff"
                 android:background="@color/transparent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
@@ -41,7 +41,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="end">
-        <!-- Nút đăng ký -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/btn_register"
             android:layout_width="150dp"
@@ -60,7 +59,6 @@
                 android:gravity="center_vertical"
                 android:padding="8dp">
 
-
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -73,7 +71,6 @@
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
-        <!-- Thanh tiến trình -->
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"

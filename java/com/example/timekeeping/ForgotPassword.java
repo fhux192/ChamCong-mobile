@@ -16,6 +16,9 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.List;
+import java.util.Locale;
+
 public class ForgotPassword extends AppCompatActivity {
 
     // =============== FIELDS ===============
@@ -58,7 +61,6 @@ public class ForgotPassword extends AppCompatActivity {
     private boolean isValidEmail(String email) {
         return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
-
     private void sendPasswordResetEmail(String email) {
         Toast.makeText(ForgotPassword.this, "Đang gửi email...", Toast.LENGTH_SHORT).show();
         mAuth.sendPasswordResetEmail(email)

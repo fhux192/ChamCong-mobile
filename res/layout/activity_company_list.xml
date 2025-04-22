@@ -19,7 +19,6 @@
         android:layout_marginBottom="8dp"
         android:text="Danh sách công ty" />
 
-    <!-- RecyclerView hiển thị danh sách công ty -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCompanies"
         android:layout_width="match_parent"

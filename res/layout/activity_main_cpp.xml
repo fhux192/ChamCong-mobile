@@ -83,7 +83,6 @@
         android:paddingHorizontal="4dp"
         android:drawableStart="@drawable/ic_sign_out" />
 
-    <!-- Nút "Chấm Công" với icon -->
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
