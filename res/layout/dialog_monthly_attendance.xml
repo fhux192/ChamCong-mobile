@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <NumberPicker
+            android:id="@+id/monthPicker"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+        <NumberPicker
+            android:id="@+id/yearPicker"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvTotalTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tổng thời gian làm việc: 00:00:00\nCông tháng: 0 ngày"
+        android:layout_marginTop="16dp" />
+
+    <!-- Thêm PieChartView -->
+    <com.example.timekeeping.PieChartView
+        android:id="@+id/pieChart"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"/>
+
+    <ListView
+        android:id="@+id/lvAttendance"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>

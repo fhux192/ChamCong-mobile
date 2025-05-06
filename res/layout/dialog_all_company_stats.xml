@@ -1,0 +1,95 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <NumberPicker
+                android:id="@+id/monthPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <NumberPicker
+                android:id="@+id/yearPicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <com.example.timekeeping.AllCompanyPieChartView
+            android:id="@+id/allCompanyPieChart"
+            android:layout_width="match_parent"
+            android:layout_height="300dp" />
+
+        <LinearLayout
+            android:id="@+id/legendLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:id="@+id/filterLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center">
+
+            <CheckBox
+                android:id="@+id/cbFull"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="Nghỉ" />
+
+            <CheckBox
+                android:id="@+id/cbLate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="Đi trễ" />
+
+            <CheckBox
+                android:id="@+id/cbEarly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="Về sớm" />
+
+            <CheckBox
+                android:id="@+id/cbBoth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="Cả hai" />
+        </LinearLayout>
+        <Button
+            android:id="@+id/exportButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xuất file CSV"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"/>
+        <com.example.timekeeping.CustomRecyclerView
+            android:id="@+id/employeeRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:nestedScrollingEnabled="false" />
+        <!-- Trong file res/layout/dialog_all_company_stats.xml -->
+
+    </LinearLayout>
+</ScrollView>

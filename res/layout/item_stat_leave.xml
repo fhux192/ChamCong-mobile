@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@android:color/white"
+    android:elevation="2dp">
+
+    <!-- tiêu đề -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quỹ phép"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <!-- vòng tròn / thanh tiến trình -->
+    <ProgressBar
+        android:id="@+id/progLeave"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+        android:progressTint="#4CAF50"
+        android:max="10" />
+
+    <!-- giá trị hiển thị -->
+    <TextView
+        android:id="@+id/tvLeave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 ngày"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp" />
+</LinearLayout>

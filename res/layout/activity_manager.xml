@@ -15,7 +15,6 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <!-- Tiêu đề -->
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
@@ -26,7 +25,6 @@
             android:textSize="22sp"
             tools:ignore="MissingConstraints" />
 
-        <!-- Nút thêm quản lý -->
         <Button
             android:id="@+id/add_employee"
             android:layout_width="300dp"
@@ -34,7 +32,6 @@
             android:gravity="center"
             android:text="@string/add_manager" />
 
-        <!-- Nút thêm công ty -->
         <Button
             android:id="@+id/add_company"
             android:layout_width="300dp"
@@ -42,7 +39,6 @@
             android:gravity="center"
             android:text="@string/add_company" />
 
-        <!-- Nút danh sách quản lý -->
         <Button
             android:id="@+id/manager_list"
             android:layout_width="300dp"
@@ -50,7 +46,6 @@
             android:gravity="center"
             android:text="@string/manager_list" />
 
-        <!-- Nút danh sách công ty -->
         <Button
             android:id="@+id/company_list"
             android:layout_width="300dp"
@@ -58,7 +53,6 @@
             android:gravity="center"
             android:text="@string/company_list" />
 
-        <!-- Nút đăng xuất -->
         <Button
             android:id="@+id/sign_out"
             android:layout_width="300dp"

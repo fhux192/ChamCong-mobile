@@ -55,6 +55,8 @@
         android:paddingHorizontal="4dp"
         android:drawableStart="@drawable/ic_user" />
 
+
+
     <!-- Nút "Danh Sách" với icon -->
     <Button
         android:id="@+id/showCheckedListBtn"
@@ -68,6 +70,8 @@
         android:textSize="16sp"
         android:paddingHorizontal="4dp"
         android:drawableStart="@drawable/ic_list" />
+
+    <!-- ẩn mặc định -->
 
     <!-- Nút "Đăng Xuất" với icon -->
     <Button
@@ -83,7 +87,7 @@
         android:paddingHorizontal="4dp"
         android:drawableStart="@drawable/ic_sign_out" />
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="ExtraText">
@@ -101,7 +105,38 @@
             android:textAllCaps="false"
             android:paddingHorizontal="4dp"
             android:drawableStart="@drawable/ic_check" />
+
+        <Button
+            android:id="@+id/showMonthlyStatsBtn"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="80dp"
+            android:background="@drawable/custom_button"
+            android:drawableStart="@drawable/ic_chart"
+            android:paddingHorizontal="4dp"
+            android:text="Thống kê"
+            android:textAllCaps="false"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/showAllCompanyStatsBtn"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="Thống kê"
+            android:textSize="16sp"
+            android:layout_marginBottom="80dp"
+            android:background="@drawable/custom_button"
+            android:drawableStart="@drawable/ic_chart"
+            android:paddingHorizontal="4dp"
+            android:textAllCaps="false"
+            />
     </RelativeLayout>
+
+
 
     <ImageView
         android:id="@+id/imageView"
